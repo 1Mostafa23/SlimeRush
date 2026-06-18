@@ -1,11 +1,19 @@
 using TMPro;
 using UnityEngine;
+using Zenject;
 
 public class CrowdCountLabel : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private SlimeCrowdManager slimeCrowdManager;
     [SerializeField] private TMP_Text countText;
+
+    private ISlimeCrowd slimeCrowd;
+
+    [Inject]
+    private void Construct(ISlimeCrowd slimeCrowd)
+    {
+        this.slimeCrowd = slimeCrowd;
+    }
 
     private void Awake()
     {
@@ -15,19 +23,19 @@ public class CrowdCountLabel : MonoBehaviour
 
     private void OnEnable()
     {
-        if (slimeCrowdManager == null)
+        if (slimeCrowd == null)
             return;
 
-        slimeCrowdManager.OnSlimeCountChanged += UpdateCountText;
-        UpdateCountText(slimeCrowdManager.SlimeCount);
+        slimeCrowd.OnSlimeCountChanged += UpdateCountText;
+        UpdateCountText(slimeCrowd.SlimeCount);
     }
 
     private void OnDisable()
     {
-        if (slimeCrowdManager == null)
+        if (slimeCrowd == null)
             return;
 
-        slimeCrowdManager.OnSlimeCountChanged -= UpdateCountText;
+        slimeCrowd.OnSlimeCountChanged -= UpdateCountText;
     }
 
     private void UpdateCountText(int slimeCount)

@@ -547,6 +547,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameplayInstaller
   slimeCrowdManager: {fileID: 3765177816307229069}
+  crowdFormationSettings: {fileID: 11400000, guid: 7d9b8b6fb4c14a0bb1f25f9c8b03e8f6, type: 2}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -624,8 +625,8 @@ Transform:
   m_GameObject: {fileID: 861407475}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7.3, y: 0.45, z: 25}
-  m_LocalScale: {x: 0.4, y: 0.6, z: 100}
+  m_LocalPosition: {x: 7.3, y: 0.45, z: 77.57001}
+  m_LocalScale: {x: 0.4, y: 0.6, z: 240}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 882322137}
@@ -1021,7 +1022,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f3dbf5a887f2ea4f8fb86d5aa20e404, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrowdCountLabel
-  slimeCrowdManager: {fileID: 3765177816307229069}
   countText: {fileID: 2094419266}
 --- !u!1 &1361608331
 GameObject:
@@ -1051,8 +1051,8 @@ Transform:
   m_GameObject: {fileID: 1361608331}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.3, y: 0.45, z: 25}
-  m_LocalScale: {x: 0.4, y: 0.6, z: 100}
+  m_LocalPosition: {x: -7.3, y: 0.45, z: 77.57001}
+  m_LocalScale: {x: 0.4, y: 0.6, z: 240}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 882322137}
@@ -1225,8 +1225,8 @@ Transform:
   m_GameObject: {fileID: 1515708451}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 25}
-  m_LocalScale: {x: 14, y: 0.3, z: 100}
+  m_LocalPosition: {x: 0, y: 0, z: 77.57}
+  m_LocalScale: {x: 14, y: 0.3, z: 240}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 882322137}
@@ -1592,12 +1592,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SlimeCrowdManager
   slimePrefab: {fileID: 6675536130599762117, guid: 13091a03c1b06504980b05037ea973bd, type: 3}
-  startingSlimeCount: 5
-  baseSpacing: 1
-  ellipseWidth: 1.15
-  ellipseDepth: 0.9
-  frontOffsetZ: -0.35
-  randomOffsetAmount: 0.04
+  startingSlimeCount: 12
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
