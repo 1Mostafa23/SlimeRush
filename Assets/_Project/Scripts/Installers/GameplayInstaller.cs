@@ -7,6 +7,9 @@ public class GameplayInstaller : MonoInstaller
     [SerializeField] private SlimeCrowdManager slimeCrowdManager;
     [SerializeField] private CrowdFormationSettings crowdFormationSettings;
 
+    [Header("Addressables")]
+    [SerializeField] private string slimePrefabAddress = "SlimePrefab";
+
     public override void InstallBindings()
     {
         if (slimeCrowdManager == null)
@@ -21,6 +24,14 @@ public class GameplayInstaller : MonoInstaller
             return;
         }
 
+        if (string.IsNullOrWhiteSpace(slimePrefabAddress))
+        {
+            Debug.LogError("GameplayInstaller: Slime prefab address is not assigned.");
+            return;
+        }
+
+        Container.BindInstance(new SlimePrefabAddress(slimePrefabAddress)).AsSingle();
+        Container.Bind<ISlimeFactory>().To<AddressableSlimeFactory>().AsSingle();
         Container.BindInstance(crowdFormationSettings).AsSingle();
         Container.Bind<ICrowdFormation>().To<EllipseCrowdFormation>().AsSingle();
         Container.Bind<SlimeCrowdManager>().FromInstance(slimeCrowdManager).AsSingle();

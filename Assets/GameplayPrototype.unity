@@ -548,6 +548,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameplayInstaller
   slimeCrowdManager: {fileID: 3765177816307229069}
   crowdFormationSettings: {fileID: 11400000, guid: 7d9b8b6fb4c14a0bb1f25f9c8b03e8f6, type: 2}
+  slimePrefab: {fileID: 6675536130599762117, guid: 13091a03c1b06504980b05037ea973bd, type: 3}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1591,8 +1592,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c90320b5bde33b14d8a211f35b38b88f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SlimeCrowdManager
-  slimePrefab: {fileID: 6675536130599762117, guid: 13091a03c1b06504980b05037ea973bd, type: 3}
-  startingSlimeCount: 12
+  startingSlimeCount: 10
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

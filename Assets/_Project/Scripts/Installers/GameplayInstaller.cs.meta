@@ -1,2 +1,14 @@
 fileFormatVersion: 2
 guid: 574702bac10002541adedabdd852592b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - slimeCrowdManager: {instanceID: 0}
+  - crowdFormationSettings: {instanceID: 0}
+  - slimePrefab: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

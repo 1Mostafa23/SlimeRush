@@ -1,34 +1,56 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
 
 public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
 {
-    [Header("Slime Prefab")]
-    [SerializeField] private GameObject slimePrefab;
-
     [Header("Starting Crowd")]
     [SerializeField] private int startingSlimeCount = 5;
 
     private readonly List<GameObject> slimes = new();
 
     private ICrowdFormation crowdFormation;
+    private ISlimeFactory slimeFactory;
+    private bool isInitialized;
 
     public int SlimeCount => slimes.Count;
 
     public event Action<int> OnSlimeCountChanged;
 
     [Inject]
-    private void Construct(ICrowdFormation crowdFormation)
+    private void Construct(ICrowdFormation crowdFormation, ISlimeFactory slimeFactory)
     {
         this.crowdFormation = crowdFormation;
+        this.slimeFactory = slimeFactory;
     }
 
     private void Start()
     {
-        CreateStartingCrowd();
+        InitializeCrowdAsync().Forget();
+    }
+
+    private async UniTaskVoid InitializeCrowdAsync()
+    {
+        try
+        {
+            await slimeFactory.InitializeAsync(destroyCancellationToken);
+
+            if (destroyCancellationToken.IsCancellationRequested)
+                return;
+
+            isInitialized = true;
+            CreateStartingCrowd();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception exception)
+        {
+            Debug.LogException(exception);
+        }
     }
 
     private void CreateStartingCrowd()
@@ -39,12 +61,18 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
 
     public void AddSlimes(int amount)
     {
+        if (!isInitialized)
+        {
+            Debug.LogWarning("SlimeCrowdManager: Cannot add slimes before factory initialization.");
+            return;
+        }
+
         if (amount <= 0)
             return;
 
         for (int i = 0; i < amount; i++)
         {
-            GameObject slime = Instantiate(slimePrefab, transform);
+            GameObject slime = slimeFactory.Create(transform);
             slimes.Add(slime);
         }
 
