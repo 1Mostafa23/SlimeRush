@@ -20,4 +20,12 @@ public class SlimeFactory : ISlimeFactory
     {
         return Object.Instantiate(slimePrefab, parent);
     }
+
+    public void Release(GameObject slime)
+    {
+        if (slime == null)
+            return;
+
+        Object.Destroy(slime);
+    }
 }

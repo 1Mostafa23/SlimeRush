@@ -11,6 +11,7 @@ Simple version:
 ```csharp
 public interface ISlimeFactory
 {
+    UniTask InitializeAsync(CancellationToken cancellationToken);
     GameObject Create(Transform parent);
 }
 ```
@@ -20,6 +21,7 @@ The class that needs a slime does not need to know how the slime is created.
 It only asks:
 
 ```csharp
+await slimeFactory.InitializeAsync(cancellationToken);
 GameObject slime = slimeFactory.Create(transform);
 ```
 
@@ -79,6 +81,7 @@ We move creation into another class:
 ```csharp
 public interface ISlimeFactory
 {
+    UniTask InitializeAsync(CancellationToken cancellationToken);
     GameObject Create(Transform parent);
 }
 ```
@@ -91,6 +94,11 @@ public class SlimeFactory : ISlimeFactory
     public SlimeFactory(GameObject slimePrefab)
     {
         this.slimePrefab = slimePrefab;
+    }
+
+    public UniTask InitializeAsync(CancellationToken cancellationToken)
+    {
+        return UniTask.CompletedTask;
     }
 
     public GameObject Create(Transform parent)
@@ -213,29 +221,31 @@ Current situation:
 SlimeCrowdManager
     owns slime list
     changes slime count
-    creates slime prefab
+    asks ISlimeFactory to create slimes
     destroys slime objects
     rearranges formation
 ```
 
-Better future structure:
+Current structure:
 
 ```text
 GameplayInstaller
-    binds slime prefab
-    binds ISlimeFactory -> SlimeFactory
+    binds SlimePrefabAddress("SlimePrefab")
+    binds ISlimeFactory -> AddressableSlimeFactory
     binds ISlimeCrowd -> SlimeCrowdManager
     binds ISlimeCrowdCommands -> SlimeCrowdManager
 
 SlimeCrowdManager
     owns slime list
     changes slime count
+    waits for slime factory initialization
     asks ISlimeFactory to create slimes
     rearranges formation
 
-SlimeFactory
-    knows the slime prefab
-    creates slime GameObjects
+AddressableSlimeFactory
+    loads the slime prefab through Addressables
+    stores the loaded prefab
+    creates slime GameObjects from the loaded prefab
 
 EllipseCrowdFormation
     calculates positions
@@ -262,6 +272,7 @@ using UnityEngine;
 
 public interface ISlimeFactory
 {
+    UniTask InitializeAsync(CancellationToken cancellationToken);
     GameObject Create(Transform parent);
 }
 ```
@@ -276,6 +287,11 @@ public class SlimeFactory : ISlimeFactory
     public SlimeFactory(GameObject slimePrefab)
     {
         this.slimePrefab = slimePrefab;
+    }
+
+    public UniTask InitializeAsync(CancellationToken cancellationToken)
+    {
+        return UniTask.CompletedTask;
     }
 
     public GameObject Create(Transform parent)
@@ -308,6 +324,40 @@ This version is easy to understand.
 The factory still uses normal Unity `Object.Instantiate`.
 
 The value is that `SlimeCrowdManager` no longer knows about the prefab.
+
+In the current project, this simple factory was used as an intermediate learning step.
+
+The project now uses `AddressableSlimeFactory` instead.
+
+## Current Addressable Factory
+
+The current project has this chain:
+
+```text
+SlimeCrowdManager
+    -> ISlimeFactory
+    -> AddressableSlimeFactory
+    -> Addressables.LoadAssetAsync("SlimePrefab")
+    -> Object.Instantiate(loadedSlimePrefab)
+```
+
+The important design decision:
+
+```text
+Do async loading once.
+Keep Create synchronous after preload.
+```
+
+That is why `ISlimeFactory` has two responsibilities:
+
+```csharp
+UniTask InitializeAsync(CancellationToken cancellationToken);
+GameObject Create(Transform parent);
+```
+
+`InitializeAsync` prepares the factory.
+
+`Create` creates one slime after the factory is ready.
 
 ## Zenject Prefab Factory
 
@@ -378,6 +428,28 @@ If `SlimeCrowdManager` depends only on `ISlimeFactory`, it does not care.
 The manager code can stay almost the same.
 
 This is one of the main benefits of the factory pattern.
+
+For SlimeRush, pooling is the next logical improvement because the game may have many slimes.
+
+Addressables already solved loading the prefab.
+
+Pooling would solve repeated creation and destruction of slime GameObjects.
+
+Current behavior:
+
+```text
+AddSlimes -> Instantiate
+RemoveSlimes -> Destroy
+```
+
+Future pooled behavior:
+
+```text
+AddSlimes -> get inactive slime from pool
+RemoveSlimes -> return slime to pool
+```
+
+This reduces runtime allocations and work for the garbage collector.
 
 ## SOLID Connection
 
@@ -465,13 +537,21 @@ Do not add all factory patterns at once.
 
 Use this order:
 
-1. Keep current `SlimeCrowdManager` as it is until the current behavior is stable.
-2. Create `ISlimeFactory`.
-3. Create simple `SlimeFactory` that uses `Object.Instantiate`.
-4. Bind `ISlimeFactory` in `GameplayInstaller`.
-5. Inject `ISlimeFactory` into `SlimeCrowdManager`.
-6. Remove `slimePrefab` from `SlimeCrowdManager`.
-7. Later, if needed, replace `SlimeFactory` with Zenject prefab factory or pooling.
+1. Create `ISlimeFactory`.
+2. Create simple `SlimeFactory` that uses `Object.Instantiate`.
+3. Bind `ISlimeFactory` in `GameplayInstaller`.
+4. Inject `ISlimeFactory` into `SlimeCrowdManager`.
+5. Remove `slimePrefab` from `SlimeCrowdManager`.
+6. Install Addressables.
+7. Mark the slime prefab as Addressable with key `SlimePrefab`.
+8. Install UniTask.
+9. Create `AddressableSlimeFactory`.
+10. Preload the slime prefab once.
+11. Later, add pooling.
+
+Steps 1-10 are done in this project.
+
+Step 11 is next.
 
 The goal is not to use patterns everywhere.
 
@@ -485,6 +565,7 @@ new Vector3(...) - normal
 Object.Instantiate(slimePrefab) inside SlimeCrowdManager - acceptable now, but factory is better later
 new EllipseCrowdFormation(...) inside SlimeCrowdManager - bad, use DI
 ISlimeFactory injected into SlimeCrowdManager - good
+AddressableSlimeFactory with preload - good
 Zenject factory - good when spawned prefabs need injection
 pool factory - good when many objects are spawned and destroyed often
 ```
@@ -494,4 +575,3 @@ pool factory - good when many objects are spawned and destroyed often
 A factory is useful when object creation is a decision you may want to change later.
 
 For SlimeRush, slimes are a good candidate for a factory because they are gameplay objects created many times, and their creation may later involve Zenject injection or pooling.
-

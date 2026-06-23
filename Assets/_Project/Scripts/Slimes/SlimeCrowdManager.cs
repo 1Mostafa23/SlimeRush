@@ -93,7 +93,7 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
             GameObject slimeToRemove = slimes[lastIndex];
 
             slimes.RemoveAt(lastIndex);
-            Destroy(slimeToRemove);
+            slimeFactory.Release(slimeToRemove);
         }
 
         RearrangeCrowd();
@@ -128,7 +128,7 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
         for (int i = slimes.Count - 1; i >= 0; i--)
         {
             if (slimes[i] != null)
-                Destroy(slimes[i]);
+                slimeFactory.Release(slimes[i]);
         }
 
         slimes.Clear();

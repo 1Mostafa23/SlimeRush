@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -12,6 +13,7 @@ public class AddressableSlimeFactory : ISlimeFactory, IDisposable
     private AsyncOperationHandle<GameObject> loadHandle;
     private GameObject loadedSlimePrefab;
     private bool hasLoadHandle;
+    private readonly Stack<GameObject> inactiveSlimes = new();
 
     public AddressableSlimeFactory(SlimePrefabAddress slimePrefabAddress)
     {
@@ -41,11 +43,45 @@ public class AddressableSlimeFactory : ISlimeFactory, IDisposable
         if (loadedSlimePrefab == null)
             throw new InvalidOperationException("Slime prefab is not loaded. Call InitializeAsync before Create.");
 
-        return UnityEngine.Object.Instantiate(loadedSlimePrefab, parent);
+        GameObject slime = inactiveSlimes.Count > 0
+            ? inactiveSlimes.Pop()
+            : UnityEngine.Object.Instantiate(loadedSlimePrefab);
+
+        Transform slimeTransform = slime.transform;
+        slimeTransform.SetParent(parent, false);
+        slimeTransform.localPosition = Vector3.zero;
+        slimeTransform.localRotation = Quaternion.identity;
+        slimeTransform.localScale = Vector3.one;
+
+        slime.SetActive(true);
+        return slime;
+    }
+
+    public void Release(GameObject slime)
+    {
+        if (slime == null)
+            return;
+
+        Transform slimeTransform = slime.transform;
+        slimeTransform.SetParent(null, false);
+        slimeTransform.localPosition = Vector3.zero;
+        slimeTransform.localRotation = Quaternion.identity;
+        slimeTransform.localScale = Vector3.one;
+
+        slime.SetActive(false);
+        inactiveSlimes.Push(slime);
     }
 
     public void Dispose()
     {
+        while (inactiveSlimes.Count > 0)
+        {
+            GameObject slime = inactiveSlimes.Pop();
+
+            if (slime != null)
+                UnityEngine.Object.Destroy(slime);
+        }
+
         if (!hasLoadHandle)
             return;
 

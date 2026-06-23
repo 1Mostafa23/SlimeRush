@@ -44,15 +44,36 @@ SlimeCrowdManager -> ISlimeFactory -> AddressableSlimeFactory -> Addressables
 
 ## Current Project Status
 
-At the time this note was written, `Packages/manifest.json` does not contain:
+Current project state:
 
 ```text
-com.unity.addressables
+com.unity.addressables - installed
+com.cysharp.unitask - installed
+slime prefab address - SlimePrefab
+ISlimeFactory - exists
+AddressableSlimeFactory - exists
 ```
 
-So Addressables are not installed yet.
+The slime prefab is marked as Addressable and lives in the default local Addressables group.
 
-Before marking prefabs as Addressable, install the package through Unity Package Manager.
+The current runtime chain is:
+
+```text
+GameplayInstaller
+    binds SlimePrefabAddress("SlimePrefab")
+    binds ISlimeFactory -> AddressableSlimeFactory
+
+SlimeCrowdManager
+    receives ISlimeFactory
+    waits for factory initialization
+    asks factory to create slimes
+
+AddressableSlimeFactory
+    loads "SlimePrefab" once
+    stores the loaded prefab
+    creates slime instances from the loaded prefab
+    releases Addressables handle on dispose
+```
 
 ## What Addressables Should Be Used For
 
@@ -180,9 +201,22 @@ Or should we preload the prefab once, then spawn quickly?
 
 For SlimeRush, preload is easier to understand.
 
+The project uses UniTask for this async preload step:
+
+```csharp
+await slimeFactory.InitializeAsync(destroyCancellationToken);
+```
+
+This keeps `SlimeCrowdManager` simple:
+
+```text
+Initialize factory once.
+Then create slimes normally.
+```
+
 ## Recommended Approach for SlimeRush
 
-Use this order:
+The learning order:
 
 1. Create normal `ISlimeFactory`.
 2. Create normal `SlimeFactory` using `Object.Instantiate`.
@@ -193,6 +227,10 @@ Use this order:
 7. Preload the slime prefab once.
 8. Spawn slimes from the loaded prefab.
 9. Later add pooling if spawning becomes expensive.
+
+Steps 1-8 are already done.
+
+Step 9 is the next performance-oriented architecture topic.
 
 This order keeps learning clear:
 
@@ -232,34 +270,45 @@ public class SlimeFactory : ISlimeFactory
 
 This teaches the factory pattern without the async complexity of Addressables.
 
-## Addressable Factory Concept
+## Current Addressable Factory
 
-After Addressables are installed, the factory can become responsible for loading.
-
-Concept:
+The current factory interface has initialization and creation:
 
 ```csharp
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using UnityEngine;
+
 public interface ISlimeFactory
 {
+    UniTask InitializeAsync(CancellationToken cancellationToken);
     GameObject Create(Transform parent);
 }
 ```
 
-```csharp
-public class AddressableSlimeFactory : ISlimeFactory
-{
-    private GameObject loadedSlimePrefab;
+`InitializeAsync` exists because Addressables loading is async.
 
-    public GameObject Create(Transform parent)
-    {
-        return Object.Instantiate(loadedSlimePrefab, parent);
-    }
+`Create` stays synchronous because the prefab is already loaded before gameplay creates slimes.
+
+```csharp
+public async UniTask InitializeAsync(CancellationToken cancellationToken)
+{
+    loadHandle = Addressables.LoadAssetAsync<GameObject>(slimePrefabAddress.Value);
+    await loadHandle.Task;
+
+    cancellationToken.ThrowIfCancellationRequested();
+    loadedSlimePrefab = loadHandle.Result;
 }
 ```
 
-The missing part is loading `loadedSlimePrefab`.
+Then creation is simple:
 
-That can be done during a preload step.
+```csharp
+public GameObject Create(Transform parent)
+{
+    return Object.Instantiate(loadedSlimePrefab, parent);
+}
+```
 
 ## Preloading Concept
 
@@ -286,6 +335,12 @@ Factory instantiates the already loaded prefab
 
 This is easier than making `AddSlimes` return `Task` or use coroutines.
 
+This also avoids calling Addressables for every single slime.
+
+Addressables loads the prefab once.
+
+Instantiation still happens many times.
+
 ## Address Key
 
 The Addressable key is a string or asset reference used to load the asset.
@@ -309,7 +364,7 @@ Good keys are stable and descriptive.
 
 ## Factory Binding
 
-Normal factory binding:
+Old normal factory binding:
 
 ```csharp
 Container.Bind<ISlimeFactory>()
@@ -317,9 +372,11 @@ Container.Bind<ISlimeFactory>()
     .AsSingle();
 ```
 
-Addressable factory binding later:
+Current Addressables factory binding:
 
 ```csharp
+Container.BindInstance(new SlimePrefabAddress(slimePrefabAddress)).AsSingle();
+
 Container.Bind<ISlimeFactory>()
     .To<AddressableSlimeFactory>()
     .AsSingle();
@@ -408,12 +465,18 @@ SlimeCrowdManager should know neither detail.
 For this project:
 
 ```text
-SlimeCrowdManager -> ISlimeFactory -> AddressableSlimeFactory -> Addressables.LoadAssetAsync("SlimePrefab")
+SlimeCrowdManager
+    -> ISlimeFactory
+    -> AddressableSlimeFactory
+    -> Addressables.LoadAssetAsync("SlimePrefab")
+    -> Object.Instantiate(loadedSlimePrefab)
 ```
 
-Start with a normal factory first.
+The normal factory step is complete.
 
-Then replace its internals with Addressables.
+The Addressables preload step is complete.
+
+The next performance step is pooling.
 
 ## Practical Rule
 
@@ -436,3 +499,40 @@ ICrowdFormation - no
 ISlimeCrowd - no
 ```
 
+## Addressables vs Pooling
+
+Addressables and pooling solve different problems.
+
+Addressables answer:
+
+```text
+Where does the prefab asset come from?
+How is it loaded?
+When do we release the loaded asset?
+```
+
+Pooling answers:
+
+```text
+Do we really need to Instantiate and Destroy every time?
+Can we reuse old slime objects instead?
+```
+
+Current project:
+
+```text
+Addressables load the slime prefab once.
+Object.Instantiate still creates every slime object.
+Destroy still removes slime objects.
+```
+
+Future project with pooling:
+
+```text
+Addressables load the slime prefab once.
+Pool creates an initial set of slime objects.
+AddSlimes takes inactive slimes from the pool.
+RemoveSlimes returns slimes to the pool instead of destroying them.
+```
+
+This is why pooling is the next good topic for many slimes.
