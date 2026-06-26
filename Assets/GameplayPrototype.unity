@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 21369745}
   - component: {fileID: 21369744}
   m_Layer: 0
-  m_Name: LeftPillar
+  m_Name: LeftPillar2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -245,6 +245,7 @@ GameObject:
   - component: {fileID: 76354654}
   - component: {fileID: 76354653}
   - component: {fileID: 76354652}
+  - component: {fileID: 76354655}
   m_Layer: 0
   m_Name: Panel
   m_TagString: Untagged
@@ -345,6 +346,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 76354650}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &76354655
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 76354650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bc6d1c7bb7b4f7eb0d0556fb18a1007, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GateVisualView
+  labelText: {fileID: 281685772}
 --- !u!1 &243943653
 GameObject:
   m_ObjectHideFlags: 0
@@ -437,9 +451,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '+10
-
-'
+  m_text: +10
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -887,7 +899,7 @@ GameObject:
   - component: {fileID: 470859258}
   - component: {fileID: 470859257}
   m_Layer: 0
-  m_Name: LabelText
+  m_Name: LabelText2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1071,6 +1083,7 @@ GameObject:
   m_Component:
   - component: {fileID: 564232916}
   - component: {fileID: 564232917}
+  - component: {fileID: 564232918}
   m_Layer: 0
   m_Name: Gate_Multiply_2
   m_TagString: Untagged
@@ -1115,6 +1128,22 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 4.8684154, y: 3.77054, z: 1}
   m_Center: {x: -0.06512475, y: 2.0954573, z: 0}
+--- !u!114 &564232918
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 564232915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d249c12f5df456ab47b0c2a580a1006, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GateView
+  operationType: 1
+  value: 2
+  gateGroupView: {fileID: 1444175957}
+  visualView: {fileID: 1469152704}
 --- !u!1 &611796427
 GameObject:
   m_ObjectHideFlags: 0
@@ -2005,6 +2034,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1444175956}
+  - component: {fileID: 1444175957}
   m_Layer: 0
   m_Name: GatePair_01
   m_TagString: Untagged
@@ -2029,6 +2059,18 @@ Transform:
   - {fileID: 564232916}
   m_Father: {fileID: 882322137}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1444175957
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1444175955}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a677385c1a64c318ae4903f100a1011, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GateGroupView
 --- !u!1 &1469152699
 GameObject:
   m_ObjectHideFlags: 0
@@ -2041,8 +2083,9 @@ GameObject:
   - component: {fileID: 1469152703}
   - component: {fileID: 1469152702}
   - component: {fileID: 1469152701}
+  - component: {fileID: 1469152704}
   m_Layer: 0
-  m_Name: Panel
+  m_Name: Panel2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2141,6 +2184,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1469152699}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1469152704
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1469152699}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bc6d1c7bb7b4f7eb0d0556fb18a1007, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GateVisualView
+  labelText: {fileID: 470859257}
 --- !u!1 &1469825115
 GameObject:
   m_ObjectHideFlags: 0
@@ -2297,7 +2353,7 @@ GameObject:
   - component: {fileID: 1686202140}
   - component: {fileID: 1686202139}
   m_Layer: 0
-  m_Name: 'RightPillar '
+  m_Name: 'RightPillar2 '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2408,6 +2464,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1891498049}
   - component: {fileID: 1891498050}
+  - component: {fileID: 1891498051}
   m_Layer: 0
   m_Name: Gate_Add_10
   m_TagString: Untagged
@@ -2452,6 +2509,22 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 4.7992115, y: 3.7593892, z: 1}
   m_Center: {x: -0.018359661, y: 1.9587034, z: 0}
+--- !u!114 &1891498051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1891498048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d249c12f5df456ab47b0c2a580a1006, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GateView
+  operationType: 0
+  value: 10
+  gateGroupView: {fileID: 1444175957}
+  visualView: {fileID: 76354655}
 --- !u!1 &2094419264
 GameObject:
   m_ObjectHideFlags: 0

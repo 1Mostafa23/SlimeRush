@@ -37,5 +37,11 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<SlimeCrowdManager>().FromInstance(slimeCrowdManager).AsSingle();
         Container.Bind<ISlimeCrowd>().FromInstance(slimeCrowdManager).AsSingle();
         Container.Bind<ISlimeCrowdCommands>().FromInstance(slimeCrowdManager).AsSingle();
+        Container.Bind<AddGateOperation>().AsSingle();
+        Container.Bind<MultiplyGateOperation>().AsSingle();
+        Container.Bind<SubtractGateOperation>().AsSingle();
+        Container.Bind<GateOperationResolver>().AsSingle();
+        Container.Bind<CrowdCountChangeApplier>().AsSingle();
+        Container.Bind<GateEffectApplier>().AsSingle();
     }
 }

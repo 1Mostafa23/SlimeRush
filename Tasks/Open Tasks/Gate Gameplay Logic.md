@@ -19,7 +19,7 @@ Do not add individual slime collision logic in this task.
 
 ## Open Tasks
 
-1. Final physics setup check
+1. [x] Final physics setup check
 
    Verify:
 
@@ -31,7 +31,7 @@ Do not add individual slime collision logic in this task.
    Individual slime colliders are not used for gate logic
    ```
 
-2. Create `GateOperationType`
+2. [x] Create `GateOperationType`
 
    Values:
 
@@ -41,13 +41,13 @@ Do not add individual slime collision logic in this task.
    Subtract
    ```
 
-3. Create `IGateMathOperation`
+3. [x] Create `IGateMathOperation`
 
    Contract for pure gate math.
 
    This should not know about Unity, Zenject, colliders, or `SlimeCrowdManager`.
 
-4. Create operation implementations
+4. [x] Create operation implementations
 
    Files:
 
@@ -57,7 +57,7 @@ Do not add individual slime collision logic in this task.
    SubtractGateOperation.cs
    ```
 
-5. Create `GateOperationResolver`
+5. [x] Create `GateOperationResolver`
 
    It should resolve:
 
@@ -67,7 +67,7 @@ Do not add individual slime collision logic in this task.
    Subtract -> SubtractGateOperation
    ```
 
-6. Create `CrowdCountChangeApplier`
+6. [x] Create `CrowdCountChangeApplier`
 
    Responsibilities:
 
@@ -77,7 +77,7 @@ Do not add individual slime collision logic in this task.
    never depend directly on SlimeCrowdManager
    ```
 
-7. Create `GateEffectApplier`
+7. [x] Create `GateEffectApplier`
 
    Responsibilities:
 
@@ -88,7 +88,7 @@ Do not add individual slime collision logic in this task.
    apply the selected gate effect to the crowd
    ```
 
-8. Create `GateVisualView`
+8. [x] Create `GateVisualView`
 
    MonoBehaviour for gate visuals.
 
@@ -101,7 +101,7 @@ Do not add individual slime collision logic in this task.
    no gameplay logic
    ```
 
-9. Create `GateView`
+9. [x] Create `GateView`
 
    MonoBehaviour for the root gate object.
 
@@ -117,7 +117,20 @@ Do not add individual slime collision logic in this task.
    disable gate after use
    ```
 
-10. Update `GameplayInstaller`
+10. [x] Create `GateGroupView`
+
+    MonoBehaviour for a parent gate pair/group.
+
+    Responsibilities:
+
+    ```text
+    remember that one gate in the group was already used
+    allow only one gate effect per group
+    keep unused sibling gates visible
+    avoid Zenject injection for scene-specific gate pair references
+    ```
+
+11. [x] Update `GameplayInstaller`
 
     Add bindings for:
 
@@ -130,7 +143,7 @@ Do not add individual slime collision logic in this task.
     GateEffectApplier
     ```
 
-11. Configure gates in Unity
+12. [ ] Configure gates in Unity
 
     `Gate_Add_10`:
 
@@ -150,7 +163,7 @@ Do not add individual slime collision logic in this task.
     assign visual view
     ```
 
-12. Test in Play Mode
+13. [ ] Test in Play Mode
 
     Verify:
 
@@ -163,11 +176,10 @@ Do not add individual slime collision logic in this task.
     Console has no Zenject errors
     ```
 
-13. Later separate tasks
+14. [ ] Later separate tasks
 
     ```text
     enemy that removes slimes
     subtract gate prefab if needed
     prefab workflow for future levels
     ```
-
