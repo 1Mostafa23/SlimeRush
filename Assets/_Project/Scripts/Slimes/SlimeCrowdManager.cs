@@ -5,12 +5,16 @@ using UnityEngine;
 using Zenject;
 
 
-public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
+public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands, ISlimeCrowdDamageCommands
 {
     [Header("Starting Crowd")]
     [SerializeField] private int startingSlimeCount = 5;
 
     private readonly List<GameObject> slimes = new();
+    private readonly List<Vector3> targetLocalPositions = new();
+
+    [Header("Movement")]
+    [SerializeField] private float formationFollowSpeed = 12f;
 
     private ICrowdFormation crowdFormation;
     private ISlimeFactory slimeFactory;
@@ -30,6 +34,11 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
     private void Start()
     {
         InitializeCrowdAsync().Forget();
+    }
+
+    private void Update()
+    {
+        MoveSlimesToFormation();
     }
 
     private async UniTaskVoid InitializeCrowdAsync()
@@ -76,7 +85,7 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
             slimes.Add(slime);
         }
 
-        RearrangeCrowd();
+        UpdateFormationTargets();
         NotifySlimeCountChanged();
     }
 
@@ -96,8 +105,28 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
             slimeFactory.Release(slimeToRemove);
         }
 
-        RearrangeCrowd();
+        UpdateFormationTargets();
         NotifySlimeCountChanged();
+    }
+
+    public bool RemoveSlime(SlimeHitbox slimeHitbox)
+    {
+        if (slimeHitbox == null)
+            return false;
+
+        GameObject slime = ResolveSlimeObject(slimeHitbox);
+        int slimeIndex = slimes.IndexOf(slime);
+
+        if (slimeIndex < 0)
+            return false;
+
+        slimes.RemoveAt(slimeIndex);
+        slimeFactory.Release(slime);
+
+        UpdateFormationTargets();
+        NotifySlimeCountChanged();
+
+        return true;
     }
 
     public void MultiplySlimes(int multiplier)
@@ -111,14 +140,33 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
         AddSlimes(amountToAdd);
     }
 
-    private void RearrangeCrowd()
+    private void UpdateFormationTargets()
     {
         IReadOnlyList<Vector3> positions = crowdFormation.GeneratePositions(slimes.Count);
+        targetLocalPositions.Clear();
+
+        for (int i = 0; i < slimes.Count; i++)
+        {
+            targetLocalPositions.Add(positions[i]);
+            slimes[i].transform.localRotation = Quaternion.identity;
+        }
+    }
+
+    private void MoveSlimesToFormation()
+    {
+        if (targetLocalPositions.Count != slimes.Count)
+            return;
+
+        float followAmount = 1f - Mathf.Exp(-formationFollowSpeed * Time.deltaTime);
 
         for (int i = 0; i < slimes.Count; i++)
         {
             Transform slimeTransform = slimes[i].transform;
-            slimeTransform.localPosition = positions[i];
+            slimeTransform.localPosition = Vector3.Lerp(
+                slimeTransform.localPosition,
+                targetLocalPositions[i],
+                followAmount
+            );
             slimeTransform.localRotation = Quaternion.identity;
         }
     }
@@ -132,11 +180,25 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
         }
 
         slimes.Clear();
+        targetLocalPositions.Clear();
         NotifySlimeCountChanged();
     }
 
     private void NotifySlimeCountChanged()
     {
         OnSlimeCountChanged?.Invoke(SlimeCount);
+    }
+
+    private GameObject ResolveSlimeObject(SlimeHitbox slimeHitbox)
+    {
+        Transform current = slimeHitbox.transform;
+
+        while (current != null && current.parent != transform)
+            current = current.parent;
+
+        if (current != null)
+            return current.gameObject;
+
+        return slimeHitbox.SlimeObject;
     }
 }

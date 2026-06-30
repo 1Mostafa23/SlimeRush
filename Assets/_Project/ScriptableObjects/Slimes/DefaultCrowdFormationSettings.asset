@@ -16,4 +16,7 @@ MonoBehaviour:
   ellipseWidth: 1.15
   ellipseDepth: 0.9
   frontOffsetZ: -0.35
+  rowSpacing: 0.75
+  maxRowWidth: 6
+  widestRowIndex: 3
   randomOffsetAmount: 0.05

@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Отчёт по Dependency Injection и Zenject в SlimeRush</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 16mm;
+    }
+
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: #1f2933;
+      line-height: 1.48;
+      font-size: 11.5pt;
+    }
+
+    h1 {
+      font-size: 22pt;
+      margin: 0 0 14px;
+      color: #102a43;
+    }
+
+    h2 {
+      font-size: 15pt;
+      margin: 22px 0 8px;
+      color: #243b53;
+      border-bottom: 1px solid #d9e2ec;
+      padding-bottom: 4px;
+    }
+
+    h3 {
+      font-size: 12.5pt;
+      margin: 16px 0 6px;
+      color: #334e68;
+    }
+
+    p {
+      margin: 0 0 9px;
+    }
+
+    ul {
+      margin-top: 4px;
+      margin-bottom: 10px;
+      padding-left: 22px;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    code {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 10pt;
+      background: #f0f4f8;
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    pre {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 9.5pt;
+      line-height: 1.35;
+      background: #f0f4f8;
+      border: 1px solid #d9e2ec;
+      border-radius: 6px;
+      padding: 10px 12px;
+      white-space: pre-wrap;
+      margin: 8px 0 12px;
+    }
+
+    .meta {
+      color: #52606d;
+      margin-bottom: 18px;
+    }
+
+    .note {
+      border-left: 4px solid #4098d7;
+      background: #f0f7ff;
+      padding: 9px 12px;
+      margin: 10px 0 14px;
+    }
+
+    .warning {
+      border-left: 4px solid #d64545;
+      background: #fff5f5;
+      padding: 9px 12px;
+      margin: 10px 0 14px;
+    }
+
+    .page-break {
+      break-before: page;
+    }
+  </style>
+</head>
+<body>
+  <h1>Отчёт по Dependency Injection и Zenject в проекте SlimeRush</h1>
+  <p class="meta">Unity-проект: <strong>SlimeRush</strong><br>Тема: Dependency Injection, Zenject, SceneContext и ProjectContext</p>
+
+  <h2>1. Цель работы</h2>
+  <p>
+    Цель работы - на практике освоить Dependency Injection в Unity с использованием Zenject,
+    а также разобраться, как организовывать зависимости проекта через installers, SceneContext
+    и ProjectContext.
+  </p>
+  <p>
+    В проекте SlimeRush была начата архитектурная переработка игровых систем. Прямые зависимости
+    между UI, логикой толпы и расчётом формации были заменены на зависимости от интерфейсов.
+    Это позволило уменьшить связность классов и сделать код более расширяемым.
+  </p>
+
+  <div class="warning">
+    <strong>Важно:</strong> на текущем этапе в проекте уже используется Zenject через
+    <code>SceneContext</code>. Полноценный <code>ProjectContext</code> с глобальными сервисами
+    ещё необходимо добавить отдельным шагом, чтобы полностью соответствовать формулировке задания.
+  </div>
+
+  <h2>2. Интеграция Zenject</h2>
+  <p>
+    В проект был добавлен Zenject. На сцене <code>GameplayPrototype</code> используется
+    <code>SceneContext</code>, к которому подключён <code>GameplayInstaller</code>.
+    Через installer регистрируются зависимости, необходимые для игрового уровня.
+  </p>
+
+  <pre><code>Container.BindInstance(crowdFormationSettings).AsSingle();
+Container.Bind&lt;ICrowdFormation&gt;().To&lt;EllipseCrowdFormation&gt;().AsSingle();
+
+Container.Bind&lt;SlimeCrowdManager&gt;().FromInstance(slimeCrowdManager).AsSingle();
+Container.Bind&lt;ISlimeCrowd&gt;().FromInstance(slimeCrowdManager).AsSingle();
+Container.Bind&lt;ISlimeCrowdCommands&gt;().FromInstance(slimeCrowdManager).AsSingle();</code></pre>
+
+  <p>
+    Таким образом, зависимости создаются и связываются централизованно через контейнер Zenject,
+    а не вручную внутри игровых классов.
+  </p>
+
+  <h2>3. Использование интерфейсов</h2>
+  <p>
+    Для системы слаймов были выделены отдельные интерфейсы: один для чтения состояния толпы,
+    второй для команд, изменяющих состояние.
+  </p>
+
+  <h3>Интерфейс чтения</h3>
+  <pre><code>public interface ISlimeCrowd
+{
+    int SlimeCount { get; }
+    event Action&lt;int&gt; OnSlimeCountChanged;
+}</code></pre>
+
+  <h3>Командный интерфейс</h3>
+  <pre><code>public interface ISlimeCrowdCommands
+{
+    void AddSlimes(int amount);
+    void RemoveSlimes(int amount);
+    void MultiplySlimes(int multiplier);
+}</code></pre>
+
+  <p>
+    Такое разделение соответствует Interface Segregation Principle. UI получает только
+    <code>ISlimeCrowd</code> и не может изменять количество слаймов. Игровые объекты, например
+    ворота, бонусы или враги, смогут использовать <code>ISlimeCrowdCommands</code>.
+  </p>
+
+  <h2>4. Вынесение расчёта формации</h2>
+  <p>
+    До рефакторинга <code>SlimeCrowdManager</code> отвечал не только за хранение и создание
+    слаймов, но и за математический расчёт их расположения. Это нарушало принцип единственной
+    ответственности.
+  </p>
+
+  <p>Для расчёта формации был создан интерфейс:</p>
+
+  <pre><code>public interface ICrowdFormation
+{
+    IReadOnlyList&lt;Vector3&gt; GeneratePositions(int count);
+}</code></pre>
+
+  <p>И отдельная реализация:</p>
+
+  <pre><code>public class EllipseCrowdFormation : ICrowdFormation
+{
+    private readonly CrowdFormationSettings settings;
+
+    public EllipseCrowdFormation(CrowdFormationSettings settings)
+    {
+        this.settings = settings;
+    }
+}</code></pre>
+
+  <p>
+    Теперь <code>SlimeCrowdManager</code> не знает, как именно рассчитывается форма толпы.
+    Он получает <code>ICrowdFormation</code> через Zenject и использует только метод
+    <code>GeneratePositions</code>.
+  </p>
+
+  <pre><code>[Inject]
+private void Construct(ICrowdFormation crowdFormation)
+{
+    this.crowdFormation = crowdFormation;
+}</code></pre>
+
+  <h2>5. ScriptableObject для настроек</h2>
+  <p>
+    Для параметров формации был создан <code>CrowdFormationSettings : ScriptableObject</code>.
+    В него вынесены значения, влияющие на форму толпы:
+  </p>
+
+  <ul>
+    <li><code>baseSpacing</code></li>
+    <li><code>ellipseWidth</code></li>
+    <li><code>ellipseDepth</code></li>
+    <li><code>frontOffsetZ</code></li>
+    <li><code>randomOffsetAmount</code></li>
+  </ul>
+
+  <p>
+    Использование <code>ScriptableObject</code> удобно для Unity, потому что настройки можно
+    менять через Inspector без изменения кода. Также можно создавать разные assets с настройками
+    для разных уровней.
+  </p>
+
+  <h2>6. Dependency Injection в UI</h2>
+  <p>
+    Компонент <code>CrowdCountLabel</code> получает зависимость через Zenject:
+  </p>
+
+  <pre><code>[Inject]
+private void Construct(ISlimeCrowd slimeCrowd)
+{
+    this.slimeCrowd = slimeCrowd;
+}</code></pre>
+
+  <p>
+    Благодаря этому UI не зависит напрямую от <code>SlimeCrowdManager</code>. Он работает только
+    с интерфейсом <code>ISlimeCrowd</code>, то есть только читает состояние.
+  </p>
+
+  <h2 class="page-break">7. ProjectContext и глобальные сервисы</h2>
+  <p>
+    По заданию необходимо создать <code>ProjectContext</code> и вынести в него глобальные сервисы.
+    Важно не переносить туда всё подряд. <code>ProjectContext</code> должен содержать только те
+    зависимости, которые живут на протяжении всей игры и не относятся к конкретному уровню.
+  </p>
+
+  <p>Для SlimeRush глобальными сервисами могут быть:</p>
+
+  <ul>
+    <li><code>IInputService</code> - единая обработка ввода;</li>
+    <li><code>ISaveSystem</code> - сохранение и загрузка прогресса;</li>
+    <li><code>ISceneService</code> - централизованная загрузка сцен;</li>
+    <li><code>IAudioService</code> - глобальное управление звуком;</li>
+    <li><code>IGameProgressService</code> - прогресс игрока между уровнями.</li>
+  </ul>
+
+  <p>
+    Не следует выносить в <code>ProjectContext</code> объекты конкретного уровня:
+    <code>SlimeCrowdManager</code>, ворота, врагов, level spawner или настройки формации конкретной
+    сцены. Эти зависимости должны оставаться в <code>SceneContext</code>.
+  </p>
+
+  <h2>8. Предлагаемый ProjectInstaller</h2>
+  <p>
+    Для полного соответствия заданию можно создать отдельный <code>ProjectInstaller</code>:
+  </p>
+
+  <pre><code>public class ProjectInstaller : MonoInstaller
+{
+    public override void InstallBindings()
+    {
+        Container.Bind&lt;IInputService&gt;().To&lt;InputService&gt;().AsSingle();
+        Container.Bind&lt;ISaveSystem&gt;().To&lt;SaveSystem&gt;().AsSingle();
+        Container.Bind&lt;ISceneService&gt;().To&lt;SceneService&gt;().AsSingle();
+        Container.Bind&lt;IAudioService&gt;().To&lt;AudioService&gt;().AsSingle();
+    }
+}</code></pre>
+
+  <p>
+    Этот installer должен быть подключён к объекту <code>ProjectContext</code>. После этого
+    сервисы будут доступны во всех сценах проекта.
+  </p>
+
+  <h2>9. Выбор Lifetime</h2>
+  <p>
+    Для глобальных сервисов лучше использовать <code>AsSingle</code>, потому что они должны
+    существовать в одном экземпляре на протяжении всей игры.
+  </p>
+
+  <ul>
+    <li><code>InputService - AsSingle</code>: один источник ввода для всей игры.</li>
+    <li><code>SaveSystem - AsSingle</code>: единая система сохранений.</li>
+    <li><code>SceneService - AsSingle</code>: единая точка загрузки сцен.</li>
+    <li><code>AudioService - AsSingle</code>: один глобальный контроллер звука.</li>
+  </ul>
+
+  <p>
+    <code>AsTransient</code> не подходит для таких сервисов, потому что каждый запрос создавал бы
+    новый объект. Это может привести к потере состояния. <code>AsCached</code> можно использовать
+    для ленивого создания объекта при первом запросе, но для базовых глобальных сервисов
+    <code>AsSingle</code> проще и понятнее.
+  </p>
+
+  <h2>10. Преимущества Dependency Injection</h2>
+  <p>Использование DI в проекте даёт следующие преимущества:</p>
+
+  <ul>
+    <li>классы зависят от интерфейсов, а не от конкретных реализаций;</li>
+    <li>реализации можно заменять без изменения потребителей;</li>
+    <li>UI не получает лишний доступ к игровой логике;</li>
+    <li>уменьшается количество жёстких ссылок между <code>MonoBehaviour</code>;</li>
+    <li>зависимости класса видны явно через <code>Construct</code> или constructor;</li>
+    <li>код становится проще тестировать и расширять;</li>
+    <li>архитектура становится ближе к принципам чистого кода.</li>
+  </ul>
+
+  <h2>11. Что нужно приложить к сдаче</h2>
+  <p>Для сдачи задания необходимо подготовить:</p>
+
+  <ul>
+    <li>Unity-проект с интегрированным Zenject;</li>
+    <li>созданный и подключённый <code>ProjectContext</code>;</li>
+    <li><code>ProjectInstaller</code> с глобальными сервисами;</li>
+    <li>пример использования хотя бы одного сервиса через <code>[Inject]</code>;</li>
+    <li>скриншоты настройки <code>ProjectContext</code> и <code>ProjectInstaller</code>;</li>
+    <li>PDF-отчёт с описанием архитектурных решений.</li>
+  </ul>
+
+  <h2>12. Вывод</h2>
+  <p>
+    В проекте SlimeRush уже используется Zenject для управления зависимостями на уровне сцены.
+    Были выделены интерфейсы для чтения и изменения состояния толпы, а расчёт формации был вынесен
+    в отдельную зависимость <code>ICrowdFormation</code>.
+  </p>
+  <p>
+    Следующий шаг для полного выполнения задания - добавить <code>ProjectContext</code> и
+    зарегистрировать в нём глобальные сервисы проекта. При этом игровые объекты конкретного уровня
+    должны оставаться в <code>SceneContext</code>, так как они относятся к конкретной игровой сцене.
+  </p>
+</body>
+</html>

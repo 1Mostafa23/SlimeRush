@@ -33,10 +33,12 @@ public class GameplayInstaller : MonoInstaller
         Container.BindInstance(new SlimePrefabAddress(slimePrefabAddress)).AsSingle();
         Container.Bind<ISlimeFactory>().To<AddressableSlimeFactory>().AsSingle();
         Container.BindInstance(crowdFormationSettings).AsSingle();
-        Container.Bind<ICrowdFormation>().To<EllipseCrowdFormation>().AsSingle();
+        Container.Bind<ICrowdFormation>().To<CountMastersCrowdFormation>().AsSingle();
         Container.Bind<SlimeCrowdManager>().FromInstance(slimeCrowdManager).AsSingle();
         Container.Bind<ISlimeCrowd>().FromInstance(slimeCrowdManager).AsSingle();
         Container.Bind<ISlimeCrowdCommands>().FromInstance(slimeCrowdManager).AsSingle();
+        Container.Bind<ISlimeCrowdDamageCommands>().FromInstance(slimeCrowdManager).AsSingle();
+        Container.Bind<SlimeDamageApplier>().AsSingle();
         Container.Bind<AddGateOperation>().AsSingle();
         Container.Bind<MultiplyGateOperation>().AsSingle();
         Container.Bind<SubtractGateOperation>().AsSingle();
