@@ -32,7 +32,9 @@ public class GameplayInstaller : MonoInstaller
 
         Container.BindInstance(new SlimePrefabAddress(slimePrefabAddress)).AsSingle();
         Container.Bind<ISlimeFactory>().To<AddressableSlimeFactory>().AsSingle();
+        Container.Bind<ISlimePool>().To<SlimePool>().AsSingle();
         Container.BindInstance(crowdFormationSettings).AsSingle();
+        Container.Bind<ICrowdRowAllocator>().To<CountMastersCrowdRowAllocator>().AsSingle();
         Container.Bind<ICrowdFormation>().To<CountMastersCrowdFormation>().AsSingle();
         Container.Bind<SlimeCrowdManager>().FromInstance(slimeCrowdManager).AsSingle();
         Container.Bind<ISlimeCrowd>().FromInstance(slimeCrowdManager).AsSingle();
@@ -44,6 +46,6 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<SubtractGateOperation>().AsSingle();
         Container.Bind<GateOperationResolver>().AsSingle();
         Container.Bind<CrowdCountChangeApplier>().AsSingle();
-        Container.Bind<GateEffectApplier>().AsSingle();
+        Container.Bind<IGateEffectApplier>().To<GateEffectApplier>().AsSingle();
     }
 }

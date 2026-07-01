@@ -8,11 +8,11 @@ public class GateView : MonoBehaviour
     [SerializeField] private GateGroupView gateGroupView;
     [SerializeField] private GateVisualView visualView;
 
-    private GateEffectApplier gateEffectApplier;
+    private IGateEffectApplier gateEffectApplier;
     private bool isUsed;
 
     [Inject]
-    private void Construct(GateEffectApplier gateEffectApplier)
+    private void Construct(IGateEffectApplier gateEffectApplier)
     {
         this.gateEffectApplier = gateEffectApplier;
     }

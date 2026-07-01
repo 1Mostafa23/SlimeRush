@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49ef5f7a24314fa3b9d0f96fcebc2d6e, type: 3}
   m_Name: DefaultCrowdFormationSettings
   m_EditorClassIdentifier: 
-  baseSpacing: 1
+  baseSpacing: 0.72
   ellipseWidth: 1.15
   ellipseDepth: 0.9
   frontOffsetZ: -0.35
-  rowSpacing: 0.75
-  maxRowWidth: 6
+  rowSpacing: 0.58
+  maxRows: 8
+  maxRowWidth: 10
   widestRowIndex: 3
-  randomOffsetAmount: 0.05
+  randomOffsetAmount: 0.055

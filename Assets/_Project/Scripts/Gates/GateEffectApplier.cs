@@ -1,4 +1,4 @@
-public class GateEffectApplier
+public class GateEffectApplier : IGateEffectApplier
 {
     private readonly GateOperationResolver gateOperationResolver;
     private readonly CrowdCountChangeApplier crowdCountChangeApplier;

@@ -15,20 +15,24 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
 
     [Header("Movement")]
     [SerializeField] private float formationFollowSpeed = 12f;
+    [SerializeField] private float damageFormationRebuildDelay = 0.7f;
 
     private ICrowdFormation crowdFormation;
     private ISlimeFactory slimeFactory;
+    private ISlimePool slimePool;
     private bool isInitialized;
+    private int formationUpdateVersion;
 
     public int SlimeCount => slimes.Count;
 
     public event Action<int> OnSlimeCountChanged;
 
     [Inject]
-    private void Construct(ICrowdFormation crowdFormation, ISlimeFactory slimeFactory)
+    private void Construct(ICrowdFormation crowdFormation, ISlimeFactory slimeFactory, ISlimePool slimePool)
     {
         this.crowdFormation = crowdFormation;
         this.slimeFactory = slimeFactory;
+        this.slimePool = slimePool;
     }
 
     private void Start()
@@ -81,7 +85,7 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
 
         for (int i = 0; i < amount; i++)
         {
-            GameObject slime = slimeFactory.Create(transform);
+            GameObject slime = slimePool.Rent(transform);
             slimes.Add(slime);
         }
 
@@ -102,7 +106,7 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
             GameObject slimeToRemove = slimes[lastIndex];
 
             slimes.RemoveAt(lastIndex);
-            slimeFactory.Release(slimeToRemove);
+            slimePool.Return(slimeToRemove);
         }
 
         UpdateFormationTargets();
@@ -121,9 +125,9 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
             return false;
 
         slimes.RemoveAt(slimeIndex);
-        slimeFactory.Release(slime);
+        slimePool.Return(slime);
 
-        UpdateFormationTargets();
+        ScheduleDelayedFormationTargetsUpdate();
         NotifySlimeCountChanged();
 
         return true;
@@ -141,6 +145,43 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
     }
 
     private void UpdateFormationTargets()
+    {
+        formationUpdateVersion++;
+        RebuildFormationTargets();
+    }
+
+    private void ScheduleDelayedFormationTargetsUpdate()
+    {
+        if (damageFormationRebuildDelay <= 0f)
+        {
+            UpdateFormationTargets();
+            return;
+        }
+
+        formationUpdateVersion++;
+        DelayedFormationTargetsUpdateAsync(formationUpdateVersion).Forget();
+    }
+
+    private async UniTaskVoid DelayedFormationTargetsUpdateAsync(int expectedVersion)
+    {
+        try
+        {
+            await UniTask.Delay(
+                TimeSpan.FromSeconds(damageFormationRebuildDelay),
+                cancellationToken: destroyCancellationToken
+            );
+
+            if (expectedVersion != formationUpdateVersion)
+                return;
+
+            RebuildFormationTargets();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    private void RebuildFormationTargets()
     {
         IReadOnlyList<Vector3> positions = crowdFormation.GeneratePositions(slimes.Count);
         targetLocalPositions.Clear();
@@ -176,7 +217,7 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
         for (int i = slimes.Count - 1; i >= 0; i--)
         {
             if (slimes[i] != null)
-                slimeFactory.Release(slimes[i]);
+                slimePool.Return(slimes[i]);
         }
 
         slimes.Clear();

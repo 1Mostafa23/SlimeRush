@@ -11,17 +11,19 @@ public class CrowdFormationSettings : ScriptableObject
     [SerializeField] private float ellipseDepth = 0.9f;
     [SerializeField] private float frontOffsetZ = -0.35f;
     [SerializeField] private float rowSpacing = 0.75f;
-    [SerializeField] private int maxRowWidth = 6;
+    [SerializeField] private int maxRows = 8;
+    [SerializeField] private int maxRowWidth = 10;
     [SerializeField] private int widestRowIndex = 3;
 
     [Header("Organic Look")]
-    [SerializeField] private float randomOffsetAmount = 0.05f;
+    [SerializeField] private float randomOffsetAmount = 0.055f;
 
     public float BaseSpacing => baseSpacing;
     public float EllipseWidth => ellipseWidth;
     public float EllipseDepth => ellipseDepth;
     public float FrontOffsetZ => frontOffsetZ;
     public float RowSpacing => rowSpacing;
+    public int MaxRows => maxRows;
     public int MaxRowWidth => maxRowWidth;
     public int WidestRowIndex => widestRowIndex;
     public float RandomOffsetAmount => randomOffsetAmount;

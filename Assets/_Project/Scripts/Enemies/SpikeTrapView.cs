@@ -22,10 +22,6 @@ public class SpikeTrapView : MonoBehaviour
         TryDamageSlime(other);
     }
 
-    private void OnTriggerStay(Collider other)
-    {
-        TryDamageSlime(other);
-    }
 
     private void TryDamageSlime(Collider other)
     {
