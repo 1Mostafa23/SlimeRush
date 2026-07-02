@@ -7,19 +7,15 @@ using Zenject;
 
 public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands, ISlimeCrowdDamageCommands
 {
-    [Header("Starting Crowd")]
-    [SerializeField] private int startingSlimeCount = 5;
-
     private readonly List<GameObject> slimes = new();
     private readonly List<Vector3> targetLocalPositions = new();
 
-    [Header("Movement")]
-    [SerializeField] private float formationFollowSpeed = 12f;
-    [SerializeField] private float damageFormationRebuildDelay = 0.7f;
-
+    private SlimeCrowdSettings settings;
     private ICrowdFormation crowdFormation;
     private ISlimeFactory slimeFactory;
     private ISlimePool slimePool;
+    private ICrowdMovementStateMachine movementStateMachine;
+    private CrowdFollowFormationState followFormationState;
     private bool isInitialized;
     private int formationUpdateVersion;
 
@@ -28,21 +24,31 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
     public event Action<int> OnSlimeCountChanged;
 
     [Inject]
-    private void Construct(ICrowdFormation crowdFormation, ISlimeFactory slimeFactory, ISlimePool slimePool)
+    private void Construct(
+        SlimeCrowdSettings settings,
+        ICrowdFormation crowdFormation,
+        ISlimeFactory slimeFactory,
+        ISlimePool slimePool,
+        ICrowdMovementStateMachine movementStateMachine,
+        CrowdFollowFormationState followFormationState)
     {
+        this.settings = settings;
         this.crowdFormation = crowdFormation;
         this.slimeFactory = slimeFactory;
         this.slimePool = slimePool;
+        this.movementStateMachine = movementStateMachine;
+        this.followFormationState = followFormationState;
     }
 
     private void Start()
     {
+        movementStateMachine.ChangeState(followFormationState);
         InitializeCrowdAsync().Forget();
     }
 
     private void Update()
     {
-        MoveSlimesToFormation();
+        movementStateMachine.Tick(slimes, targetLocalPositions, Time.deltaTime);
     }
 
     private async UniTaskVoid InitializeCrowdAsync()
@@ -69,7 +75,7 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
     private void CreateStartingCrowd()
     {
         ClearCrowd();
-        AddSlimes(startingSlimeCount);
+        AddSlimes(settings.StartingSlimeCount);
     }
 
     public void AddSlimes(int amount)
@@ -152,7 +158,7 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
 
     private void ScheduleDelayedFormationTargetsUpdate()
     {
-        if (damageFormationRebuildDelay <= 0f)
+        if (settings.DamageFormationRebuildDelay <= 0f)
         {
             UpdateFormationTargets();
             return;
@@ -167,7 +173,7 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
         try
         {
             await UniTask.Delay(
-                TimeSpan.FromSeconds(damageFormationRebuildDelay),
+                TimeSpan.FromSeconds(settings.DamageFormationRebuildDelay),
                 cancellationToken: destroyCancellationToken
             );
 
@@ -190,25 +196,6 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
         {
             targetLocalPositions.Add(positions[i]);
             slimes[i].transform.localRotation = Quaternion.identity;
-        }
-    }
-
-    private void MoveSlimesToFormation()
-    {
-        if (targetLocalPositions.Count != slimes.Count)
-            return;
-
-        float followAmount = 1f - Mathf.Exp(-formationFollowSpeed * Time.deltaTime);
-
-        for (int i = 0; i < slimes.Count; i++)
-        {
-            Transform slimeTransform = slimes[i].transform;
-            slimeTransform.localPosition = Vector3.Lerp(
-                slimeTransform.localPosition,
-                targetLocalPositions[i],
-                followAmount
-            );
-            slimeTransform.localRotation = Quaternion.identity;
         }
     }
 

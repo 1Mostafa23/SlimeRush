@@ -5,6 +5,7 @@ public class GameplayInstaller : MonoInstaller
 {
     [Header("Scene References")]
     [SerializeField] private SlimeCrowdManager slimeCrowdManager;
+    [SerializeField] private SlimeCrowdSettings slimeCrowdSettings;
     [SerializeField] private CrowdFormationSettings crowdFormationSettings;
 
     [Header("Addressables")]
@@ -24,6 +25,12 @@ public class GameplayInstaller : MonoInstaller
             return;
         }
 
+        if (slimeCrowdSettings == null)
+        {
+            Debug.LogError("GameplayInstaller: SlimeCrowdSettings is not assigned.");
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(slimePrefabAddress))
         {
             Debug.LogError("GameplayInstaller: Slime prefab address is not assigned.");
@@ -33,7 +40,10 @@ public class GameplayInstaller : MonoInstaller
         Container.BindInstance(new SlimePrefabAddress(slimePrefabAddress)).AsSingle();
         Container.Bind<ISlimeFactory>().To<AddressableSlimeFactory>().AsSingle();
         Container.Bind<ISlimePool>().To<SlimePool>().AsSingle();
+        Container.BindInstance(slimeCrowdSettings).AsSingle();
         Container.BindInstance(crowdFormationSettings).AsSingle();
+        Container.Bind<ICrowdMovementStateMachine>().To<CrowdMovementStateMachine>().AsSingle();
+        Container.Bind<CrowdFollowFormationState>().AsSingle();
         Container.Bind<ICrowdRowAllocator>().To<CountMastersCrowdRowAllocator>().AsSingle();
         Container.Bind<ICrowdFormation>().To<CountMastersCrowdFormation>().AsSingle();
         Container.Bind<SlimeCrowdManager>().FromInstance(slimeCrowdManager).AsSingle();
