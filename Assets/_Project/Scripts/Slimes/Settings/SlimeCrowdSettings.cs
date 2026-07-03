@@ -6,7 +6,7 @@ using UnityEngine;
 public class SlimeCrowdSettings : ScriptableObject
 {
     [Header("Starting Crowd")]
-    [SerializeField] private int startingSlimeCount = 5;
+    [SerializeField] private int startingSlimeCount = 10;
 
     [Header("Movement")]
     [SerializeField] private float formationFollowSpeed = 12f;

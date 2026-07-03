@@ -75,6 +75,7 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
     private void CreateStartingCrowd()
     {
         ClearCrowd();
+        Debug.Log($"SlimeCrowdManager: Starting slime count from {settings.name} = {settings.StartingSlimeCount}");
         AddSlimes(settings.StartingSlimeCount);
     }
 

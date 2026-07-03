@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startingSlimeCount: 5
   formationFollowSpeed: 12
-  damageFormationRebuildDelay: 0.7
+  damageFormationRebuildDelay: 0.5
