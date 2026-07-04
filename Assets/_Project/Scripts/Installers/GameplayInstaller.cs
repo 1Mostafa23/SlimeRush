@@ -42,6 +42,7 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<ISlimePool>().To<SlimePool>().AsSingle();
         Container.BindInstance(slimeCrowdSettings).AsSingle();
         Container.BindInstance(crowdFormationSettings).AsSingle();
+        EnemyInstaller.Install(Container);
         Container.Bind<ICrowdMovementStateMachine>().To<CrowdMovementStateMachine>().AsSingle();
         Container.Bind<CrowdFollowFormationState>().AsSingle();
         Container.Bind<ICrowdRowAllocator>().To<CountMastersCrowdRowAllocator>().AsSingle();

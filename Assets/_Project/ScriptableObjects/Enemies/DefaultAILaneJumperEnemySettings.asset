@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65768132a0a6f4b4baee4292871e0e15, type: 3}
+  m_Name: DefaultAILaneJumperEnemySettings
+  m_EditorClassIdentifier: 
+  patrolSpeed: 2
+  patrolDuration: 1.5
+  laneReachDistance: 0.05
+  warningDuration: 0.7
+  dashSpeed: 8
+  jumpHeight: 0.6
+  enemyPower: 10
+  clashTickInterval: 0.35
+  defeatDeactivateDelay: 0.35
+  playerPassedZOffset: 2
+  bounceHeight: 0.1
+  bounceFrequency: 2.5
+  squashAmount: 0.06
+  visualSmoothSpeed: 14
