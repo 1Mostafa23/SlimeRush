@@ -12,15 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65768132a0a6f4b4baee4292871e0e15, type: 3}
   m_Name: DefaultAILaneJumperEnemySettings
   m_EditorClassIdentifier: 
-  patrolSpeed: 2
+  patrolSpeed: 4
   patrolDuration: 1.5
   laneReachDistance: 0.05
-  warningDuration: 0.7
-  dashSpeed: 8
-  jumpHeight: 0.6
-  enemyPower: 10
-  clashTickInterval: 0.35
-  defeatDeactivateDelay: 0.35
+  warningDuration: 0.5
+  dashSpeed: 20
+  dashPlayerSpeedMultiplier: 0.9
+  minDashSpeed: 12
+  maxDashSpeed: 28
+  jumpHeight: 1
+  enemyPower: 7
+  clashTickInterval: 0.2
+  defeatDeactivateDelay: 0.2
   playerPassedZOffset: 2
   bounceHeight: 0.1
   bounceFrequency: 2.5

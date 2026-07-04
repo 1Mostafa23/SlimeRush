@@ -16,6 +16,9 @@ public class AILaneJumperEnemySettings : ScriptableObject, IEnemyPowerSettings
     [Header("Attack")]
     [SerializeField] private float warningDuration = 0.7f;
     [SerializeField] private float dashSpeed = 8f;
+    [SerializeField] private float dashPlayerSpeedMultiplier = 0.75f;
+    [SerializeField] private float minDashSpeed = 6f;
+    [SerializeField] private float maxDashSpeed = 14f;
     [SerializeField] private float jumpHeight = 0.6f;
 
     [Header("Clash")]
@@ -37,6 +40,9 @@ public class AILaneJumperEnemySettings : ScriptableObject, IEnemyPowerSettings
     public float LaneReachDistance => laneReachDistance;
     public float WarningDuration => warningDuration;
     public float DashSpeed => dashSpeed;
+    public float DashPlayerSpeedMultiplier => dashPlayerSpeedMultiplier;
+    public float MinDashSpeed => minDashSpeed;
+    public float MaxDashSpeed => maxDashSpeed;
     public float JumpHeight => jumpHeight;
     public int EnemyPower => enemyPower;
     public float ClashTickInterval => clashTickInterval;
@@ -50,6 +56,10 @@ public class AILaneJumperEnemySettings : ScriptableObject, IEnemyPowerSettings
     private void OnValidate()
     {
         enemyPower = Mathf.Max(1, enemyPower);
+        dashSpeed = Mathf.Max(0f, dashSpeed);
+        dashPlayerSpeedMultiplier = Mathf.Max(0f, dashPlayerSpeedMultiplier);
+        minDashSpeed = Mathf.Max(0f, minDashSpeed);
+        maxDashSpeed = Mathf.Max(minDashSpeed, maxDashSpeed);
         SettingsChanged?.Invoke(this);
     }
 }

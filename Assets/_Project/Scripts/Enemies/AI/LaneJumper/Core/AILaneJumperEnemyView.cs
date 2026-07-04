@@ -21,6 +21,7 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
     private readonly Transform[] lanes = new Transform[3];
     private AILaneJumperEnemySystem laneJumperEnemySystem;
     private IEnemyLaneSelector laneSelector;
+    private IEnemyDashSpeedProvider dashSpeedProvider;
     private IEnemyClashService enemyClashService;
     private PlayerCrowdController playerCrowdController;
     private IEnemyDefeatHandler defeatHandler;
@@ -53,6 +54,7 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
     private void Construct(
         AILaneJumperEnemySystem laneJumperEnemySystem,
         IEnemyLaneSelector laneSelector,
+        IEnemyDashSpeedProvider dashSpeedProvider,
         IEnemyClashService enemyClashService,
         PlayerCrowdController playerCrowdController,
         IEnemyDefeatHandler defeatHandler,
@@ -60,6 +62,7 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
     {
         this.laneJumperEnemySystem = laneJumperEnemySystem;
         this.laneSelector = laneSelector;
+        this.dashSpeedProvider = dashSpeedProvider;
         this.enemyClashService = enemyClashService;
         this.playerCrowdController = playerCrowdController;
         this.defeatHandler = defeatHandler;
@@ -231,10 +234,14 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
 
     public void TickDash(float deltaTime)
     {
+        float dashSpeed = dashSpeedProvider != null
+            ? dashSpeedProvider.GetDashSpeed(settings)
+            : settings.DashSpeed;
+
         body.position = Vector3.MoveTowards(
             body.position,
             dashTargetPosition,
-            settings.DashSpeed * deltaTime
+            dashSpeed * deltaTime
         );
 
         float distance = Mathf.Max(0.001f, Vector3.Distance(dashStartPosition, dashTargetPosition));

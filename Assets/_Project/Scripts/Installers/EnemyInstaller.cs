@@ -12,8 +12,8 @@ public class EnemyInstaller : MonoInstaller
         if (!container.HasBinding<PlayerCrowdController>())
             container.Bind<PlayerCrowdController>().FromComponentInHierarchy().AsSingle();
 
-        if (!container.HasBinding<SideMoverEnemySystem>())
-            container.BindInterfacesAndSelfTo<SideMoverEnemySystem>().AsSingle();
+        if (!container.HasBinding<IPlayerCrowdSpeedProvider>())
+            container.Bind<IPlayerCrowdSpeedProvider>().To<PlayerCrowdController>().FromResolve();
 
         if (!container.HasBinding<AILaneJumperEnemySystem>())
             container.BindInterfacesAndSelfTo<AILaneJumperEnemySystem>().AsSingle();
@@ -23,6 +23,9 @@ public class EnemyInstaller : MonoInstaller
 
         if (!container.HasBinding<IEnemyLaneSelector>())
             container.Bind<IEnemyLaneSelector>().To<NearestPlayerLaneSelector>().AsSingle();
+
+        if (!container.HasBinding<IEnemyDashSpeedProvider>())
+            container.Bind<IEnemyDashSpeedProvider>().To<AdaptiveEnemyDashSpeedProvider>().AsSingle();
 
         if (!container.HasBinding<IEnemyDefeatHandler>())
             container.Bind<IEnemyDefeatHandler>().To<DisableEnemyDefeatHandler>().AsSingle();

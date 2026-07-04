@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1844b0927a0477280f54d3fbd7b7469, type: 3}
   m_Name: DefaultSlimeCrowdSettings
   m_EditorClassIdentifier: 
-  startingSlimeCount: 5
+  startingSlimeCount: 1
   formationFollowSpeed: 12
   damageFormationRebuildDelay: 0.5

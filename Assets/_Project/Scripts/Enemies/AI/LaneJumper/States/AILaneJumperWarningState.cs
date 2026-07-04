@@ -16,12 +16,6 @@ public class AILaneJumperWarningState : IAILaneJumperState
 
     public void Tick(float deltaTime)
     {
-        if (enemy.HasPlayerPassed())
-        {
-            enemy.ChangeToDefeated();
-            return;
-        }
-
         timer += deltaTime;
 
         if (timer >= enemy.Settings.WarningDuration)

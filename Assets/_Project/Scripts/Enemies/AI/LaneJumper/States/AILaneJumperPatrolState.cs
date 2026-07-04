@@ -16,12 +16,6 @@ public class AILaneJumperPatrolState : IAILaneJumperState
 
     public void Tick(float deltaTime)
     {
-        if (enemy.HasPlayerPassed())
-        {
-            enemy.ChangeToDefeated();
-            return;
-        }
-
         timer += deltaTime;
         enemy.TickPatrol(deltaTime);
 

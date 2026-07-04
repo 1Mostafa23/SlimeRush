@@ -9,12 +9,6 @@ public class AILaneJumperObserveState : IAILaneJumperState
 
     public void Enter()
     {
-        if (enemy.HasPlayerPassed())
-        {
-            enemy.ChangeToDefeated();
-            return;
-        }
-
         if (!enemy.SelectClosestPlayerLane())
         {
             enemy.ChangeToPatrol();

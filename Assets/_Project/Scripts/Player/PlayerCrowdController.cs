@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlayerCrowdController : MonoBehaviour
+public class PlayerCrowdController : MonoBehaviour, IPlayerCrowdSpeedProvider
 {
     [Header("Forward Movement")]
     [SerializeField] private float forwardSpeed = 5f;
@@ -11,6 +11,8 @@ public class PlayerCrowdController : MonoBehaviour
 
     private bool isMoving = true;
     private float targetX;
+
+    public float ForwardSpeed => isMoving ? forwardSpeed : 0f;
 
     private void Awake()
     {
