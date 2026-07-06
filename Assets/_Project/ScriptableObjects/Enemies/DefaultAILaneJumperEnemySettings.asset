@@ -15,8 +15,8 @@ MonoBehaviour:
   patrolSpeed: 4
   patrolDuration: 1.5
   laneReachDistance: 0.05
-  warningDuration: 0.5
-  dashSpeed: 20
+  warningDuration: 0.3
+  dashSpeed: 25
   dashPlayerSpeedMultiplier: 0.9
   minDashSpeed: 12
   maxDashSpeed: 28

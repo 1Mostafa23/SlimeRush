@@ -15,8 +15,20 @@ public class EnemyInstaller : MonoInstaller
         if (!container.HasBinding<IPlayerCrowdSpeedProvider>())
             container.Bind<IPlayerCrowdSpeedProvider>().To<PlayerCrowdController>().FromResolve();
 
+        if (!container.HasBinding<IPlayerCrowdMovementController>())
+            container.Bind<IPlayerCrowdMovementController>().To<PlayerCrowdController>().FromResolve();
+
+        if (!container.HasBinding<IPlayerCrowdPositionProvider>())
+            container.Bind<IPlayerCrowdPositionProvider>().To<PlayerCrowdController>().FromResolve();
+
         if (!container.HasBinding<AILaneJumperEnemySystem>())
             container.BindInterfacesAndSelfTo<AILaneJumperEnemySystem>().AsSingle();
+
+        if (!container.HasBinding<IAILaneJumperMover>())
+            container.Bind<IAILaneJumperMover>().To<AILaneJumperMover>().AsTransient();
+
+        if (!container.HasBinding<IAILaneJumperVisualAnimator>())
+            container.Bind<IAILaneJumperVisualAnimator>().To<AILaneJumperVisualAnimator>().AsTransient();
 
         if (!container.HasBinding<ILaneTargetProvider>())
             container.Bind<ILaneTargetProvider>().To<PlayerLaneTargetProvider>().AsSingle();

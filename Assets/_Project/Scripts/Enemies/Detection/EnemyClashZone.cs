@@ -1,7 +1,7 @@
 using UnityEngine;
 using Zenject;
 
-public class EnemyClashZone : MonoBehaviour
+public class EnemyClashZone : MonoBehaviour, IEnemyClashZone
 {
     [SerializeField] private MonoBehaviour clashTargetBehaviour;
     [SerializeField] private Collider clashCollider;

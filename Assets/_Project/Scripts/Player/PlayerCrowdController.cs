@@ -1,6 +1,9 @@
 using UnityEngine;
 
-public class PlayerCrowdController : MonoBehaviour, IPlayerCrowdSpeedProvider
+public class PlayerCrowdController : MonoBehaviour,
+    IPlayerCrowdSpeedProvider,
+    IPlayerCrowdMovementController,
+    IPlayerCrowdPositionProvider
 {
     [Header("Forward Movement")]
     [SerializeField] private float forwardSpeed = 5f;
@@ -13,6 +16,7 @@ public class PlayerCrowdController : MonoBehaviour, IPlayerCrowdSpeedProvider
     private float targetX;
 
     public float ForwardSpeed => isMoving ? forwardSpeed : 0f;
+    public float PositionZ => transform.position.z;
 
     private void Awake()
     {

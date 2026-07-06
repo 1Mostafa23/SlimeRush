@@ -18,12 +18,16 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
     [SerializeField] private EnemyClashZone clashZone;
     [SerializeField] private AILaneJumperEnemySettings settings;
 
-    private readonly Transform[] lanes = new Transform[3];
+    private IEnemyCombatant enemyCombatant;
+    private IEnemyPowerView enemyPowerDisplay;
+    private IEnemyClashFeedback enemyClashFeedback;
+    private IEnemyClashZone enemyClashZone;
     private AILaneJumperEnemySystem laneJumperEnemySystem;
-    private IEnemyLaneSelector laneSelector;
-    private IEnemyDashSpeedProvider dashSpeedProvider;
+    private IAILaneJumperMover mover;
+    private IAILaneJumperVisualAnimator visualAnimator;
     private IEnemyClashService enemyClashService;
-    private PlayerCrowdController playerCrowdController;
+    private IPlayerCrowdMovementController playerMovementController;
+    private IPlayerCrowdPositionProvider playerPositionProvider;
     private IEnemyDefeatHandler defeatHandler;
     private IPlayerPassedEnemyCondition playerPassedEnemyCondition;
     private EnemyClashTickContext clashTickContext;
@@ -34,40 +38,35 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
     private AILaneJumperDashState dashState;
     private AILaneJumperClashState clashState;
     private AILaneJumperDefeatedState defeatedState;
-    private Transform selectedLane;
-    private Vector3 dashStartPosition;
-    private Vector3 dashTargetPosition;
-    private Vector3 baseVisualLocalPosition;
-    private Vector3 baseVisualLocalScale = Vector3.one;
-    private float animationTime;
-    private int patrolLaneIndex = 1;
-    private int patrolDirection = 1;
     private bool isRegistered;
     private bool isInitialized;
     private bool isClashing;
 
     public AILaneJumperEnemySettings Settings => settings;
-    public int EnemyPower => combatant != null ? combatant.CurrentPower : 0;
+    public int EnemyPower => enemyCombatant != null ? enemyCombatant.CurrentPower : 0;
     public bool IsClashing => isClashing;
 
     [Inject]
     private void Construct(
         AILaneJumperEnemySystem laneJumperEnemySystem,
-        IEnemyLaneSelector laneSelector,
-        IEnemyDashSpeedProvider dashSpeedProvider,
+        IAILaneJumperMover mover,
+        IAILaneJumperVisualAnimator visualAnimator,
         IEnemyClashService enemyClashService,
-        PlayerCrowdController playerCrowdController,
+        IPlayerCrowdMovementController playerMovementController,
+        IPlayerCrowdPositionProvider playerPositionProvider,
         IEnemyDefeatHandler defeatHandler,
         IPlayerPassedEnemyCondition playerPassedEnemyCondition)
     {
         this.laneJumperEnemySystem = laneJumperEnemySystem;
-        this.laneSelector = laneSelector;
-        this.dashSpeedProvider = dashSpeedProvider;
+        this.mover = mover;
+        this.visualAnimator = visualAnimator;
         this.enemyClashService = enemyClashService;
-        this.playerCrowdController = playerCrowdController;
+        this.playerMovementController = playerMovementController;
+        this.playerPositionProvider = playerPositionProvider;
         this.defeatHandler = defeatHandler;
         this.playerPassedEnemyCondition = playerPassedEnemyCondition;
 
+        ResolveSceneReferences();
         CreateStates();
         TryRegister();
         TryStartStateMachine();
@@ -87,16 +86,6 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
 
     private void ResolveSceneReferences()
     {
-        lanes[0] = leftLane;
-        lanes[1] = centerLane;
-        lanes[2] = rightLane;
-
-        if (visual != null)
-        {
-            baseVisualLocalPosition = visual.localPosition;
-            baseVisualLocalScale = visual.localScale;
-        }
-
         if (combatant == null)
             combatant = GetComponent<EnemyCombatant>();
 
@@ -108,6 +97,14 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
 
         if (clashZone == null)
             clashZone = GetComponentInChildren<EnemyClashZone>(true);
+
+        enemyCombatant = combatant;
+        enemyPowerDisplay = enemyPowerView;
+        enemyClashFeedback = clashFeedback;
+        enemyClashZone = clashZone;
+
+        mover?.Configure(body, leftLane, centerLane, rightLane, settings);
+        visualAnimator?.Configure(visual, settings);
     }
 
     private void OnEnable()
@@ -145,7 +142,7 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
             return;
 
         stateMachine.Tick(deltaTime);
-        AnimateVisual(deltaTime);
+        visualAnimator?.Tick(deltaTime);
     }
 
     public void ChangeToPatrol()
@@ -180,36 +177,21 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
 
     public void TickPatrol(float deltaTime)
     {
-        Transform patrolLane = lanes[patrolLaneIndex];
-
-        if (patrolLane == null)
-            return;
-
-        Vector3 targetPosition = new(patrolLane.position.x, body.position.y, body.position.z);
-
-        body.position = Vector3.MoveTowards(
-            body.position,
-            targetPosition,
-            settings.PatrolSpeed * deltaTime
-        );
-
-        if (Mathf.Abs(body.position.x - patrolLane.position.x) <= settings.LaneReachDistance)
-            SelectNextPatrolLane();
+        mover?.TickPatrol(deltaTime);
     }
 
     public bool SelectClosestPlayerLane()
     {
-        selectedLane = laneSelector.SelectLane(lanes);
-        return selectedLane != null;
+        return mover != null && mover.SelectClosestPlayerLane();
     }
 
     public void ShowWarning()
     {
-        if (warningView == null || selectedLane == null)
+        if (warningView == null || mover?.SelectedLane == null)
             return;
 
         Vector3 warningPosition = warningView.position;
-        warningView.position = new Vector3(selectedLane.position.x, warningPosition.y, warningPosition.z);
+        warningView.position = new Vector3(mover.SelectedLane.position.x, warningPosition.y, warningPosition.z);
         warningView.gameObject.SetActive(true);
     }
 
@@ -221,52 +203,26 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
 
     public void BeginDash()
     {
-        if (selectedLane == null)
-            return;
-
-        dashStartPosition = body.position;
-        dashTargetPosition = new Vector3(
-            selectedLane.position.x,
-            body.position.y,
-            body.position.z
-        );
+        mover?.BeginDash();
     }
 
     public void TickDash(float deltaTime)
     {
-        float dashSpeed = dashSpeedProvider != null
-            ? dashSpeedProvider.GetDashSpeed(settings)
-            : settings.DashSpeed;
-
-        body.position = Vector3.MoveTowards(
-            body.position,
-            dashTargetPosition,
-            dashSpeed * deltaTime
-        );
-
-        float distance = Mathf.Max(0.001f, Vector3.Distance(dashStartPosition, dashTargetPosition));
-        float traveled = Vector3.Distance(dashStartPosition, body.position);
-        float normalizedTravel = Mathf.Clamp01(traveled / distance);
-        float heightOffset = Mathf.Sin(normalizedTravel * Mathf.PI) * settings.JumpHeight;
-        body.position = new Vector3(body.position.x, dashTargetPosition.y + heightOffset, body.position.z);
+        mover?.TickDash(deltaTime);
     }
 
     public bool HasReachedDashTarget()
     {
-        if (Vector3.SqrMagnitude(body.position - dashTargetPosition) > 0.0001f)
-            return false;
-
-        body.position = dashTargetPosition;
-        return true;
+        return mover != null && mover.HasReachedDashTarget();
     }
 
     public void BeginClash()
     {
-        if (isClashing || combatant == null || combatant.IsDefeated)
+        if (isClashing || enemyCombatant == null || enemyCombatant.IsDefeated)
             return;
 
         isClashing = true;
-        playerCrowdController?.StopMovement();
+        playerMovementController?.StopMovement();
 
         if (stateMachine != null)
             ChangeToClash();
@@ -281,8 +237,8 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
     {
         clashTickContext = new EnemyClashTickContext
         {
-            Combatant = combatant,
-            Feedback = clashFeedback,
+            Combatant = enemyCombatant,
+            Feedback = enemyClashFeedback,
             TickInterval = settings.ClashTickInterval,
             ElapsedTime = 0f
         };
@@ -298,11 +254,11 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
 
     public bool HasPlayerPassed()
     {
-        if (playerCrowdController == null)
+        if (playerPositionProvider == null)
             return false;
 
         return playerPassedEnemyCondition.HasPassed(
-            playerCrowdController,
+            playerPositionProvider,
             transform,
             settings.PlayerPassedZOffset
         );
@@ -312,8 +268,8 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
     {
         HideWarning();
         isClashing = false;
-        clashZone?.Disable();
-        clashFeedback?.PlayDefeat();
+        enemyClashZone?.Disable();
+        enemyClashFeedback?.PlayDefeat();
         DefeatAsync().Forget();
     }
 
@@ -328,58 +284,18 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
         defeatedState = new AILaneJumperDefeatedState(this);
     }
 
-    private void SelectNextPatrolLane()
-    {
-        patrolLaneIndex += patrolDirection;
-
-        if (patrolLaneIndex >= lanes.Length)
-        {
-            patrolLaneIndex = lanes.Length - 2;
-            patrolDirection = -1;
-            return;
-        }
-
-        if (patrolLaneIndex < 0)
-        {
-            patrolLaneIndex = 1;
-            patrolDirection = 1;
-        }
-    }
-
-    private void AnimateVisual(float deltaTime)
-    {
-        animationTime += deltaTime;
-
-        float rawWave = Mathf.Sin(animationTime * settings.BounceFrequency * Mathf.PI * 2f);
-        float smoothWave = Mathf.SmoothStep(0f, 1f, (rawWave + 1f) * 0.5f);
-        float bounce = smoothWave * settings.BounceHeight;
-        float squash = smoothWave * settings.SquashAmount;
-
-        Vector3 targetPosition = baseVisualLocalPosition + Vector3.up * bounce;
-        Vector3 targetScale = new(
-            baseVisualLocalScale.x * (1f + squash),
-            baseVisualLocalScale.y * (1f - squash),
-            baseVisualLocalScale.z * (1f + squash)
-        );
-
-        float smoothAmount = 1f - Mathf.Exp(-settings.VisualSmoothSpeed * deltaTime);
-        visual.localPosition = Vector3.Lerp(visual.localPosition, targetPosition, smoothAmount);
-        visual.localScale = Vector3.Lerp(visual.localScale, targetScale, smoothAmount);
-    }
-
     private void UpdatePowerLabel()
     {
-        if (enemyPowerView != null)
-            enemyPowerView.SetPower(EnemyPower);
+        enemyPowerDisplay?.SetPower(EnemyPower);
     }
 
     private void UpdatePowerLabelFromSettings()
     {
-        if (enemyPowerView == null)
+        if (enemyPowerDisplay == null)
             return;
 
         int displayedPower = settings != null ? settings.EnemyPower : EnemyPower;
-        enemyPowerView.SetPower(displayedPower);
+        enemyPowerDisplay.SetPower(displayedPower);
     }
 
     private void HandleSettingsChanged(AILaneJumperEnemySettings changedSettings)
@@ -393,22 +309,22 @@ public class AILaneJumperEnemyView : MonoBehaviour, IAILaneJumperEnemy, IAILaneJ
 
     private void ApplyCombatSettings()
     {
-        if (combatant == null)
+        if (enemyCombatant == null)
             return;
 
         if (settings != null)
         {
-            combatant.SetMaxPower(settings.EnemyPower);
+            enemyCombatant.SetMaxPower(settings.EnemyPower);
             return;
         }
 
-        combatant.ResetCombat();
+        enemyCombatant.ResetCombat();
     }
 
     private async UniTaskVoid DefeatAsync()
     {
         await UniTask.Delay((int)(settings.DefeatDeactivateDelay * 1000f), cancellationToken: destroyCancellationToken);
-        playerCrowdController?.StartMovement();
+        playerMovementController?.StartMovement();
         defeatHandler.Defeat(gameObject);
     }
 
