@@ -51,6 +51,12 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<ISlimeCrowd>().FromInstance(slimeCrowdManager).AsSingle();
         Container.Bind<ISlimeCrowdCommands>().FromInstance(slimeCrowdManager).AsSingle();
         Container.Bind<ISlimeCrowdDamageCommands>().FromInstance(slimeCrowdManager).AsSingle();
+        Container.Bind<ShieldInactiveState>().AsSingle();
+        Container.Bind<ShieldActiveState>().AsSingle();
+        Container.Bind<ShieldConsumedState>().AsSingle();
+        Container.Bind<IShieldStateMachine>().To<ShieldStateMachine>().AsSingle();
+        Container.Bind<IShieldService>().To<ShieldService>().AsSingle();
+        Container.Bind<IDamageBlocker>().To<ShieldDamageBlocker>().AsSingle();
         Container.Bind<SlimeDamageApplier>().AsSingle();
         Container.Bind<AddGateOperation>().AsSingle();
         Container.Bind<MultiplyGateOperation>().AsSingle();

@@ -133,7 +133,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 7
+  m_text: 15
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -299,6 +299,9 @@ MonoBehaviour:
   clashFeedback: {fileID: 8936098385021643576}
   clashZone: {fileID: 7074287258084235247}
   settings: {fileID: 11400000, guid: 589b8d3475be48db9d17c5dcc7febd20, type: 2}
+  overrideEnemyPower: 0
+  enemyPowerOverride: 5
+  shieldBlockRecoveryDuration: 0.45
 --- !u!114 &7068084294807774552
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -326,6 +329,8 @@ MonoBehaviour:
   visual: {fileID: 7657351679302583232}
   tickPunchDistance: 0.2
   tickSquashAmount: 0.16
+  blockedPunchDistance: 0.28
+  blockedSquashAmount: 0.18
   feedbackDuration: 0.12
   defeatScaleAmount: 0.25
 --- !u!1 &2040015258555851898

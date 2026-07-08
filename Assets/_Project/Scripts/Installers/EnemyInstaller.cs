@@ -30,6 +30,9 @@ public class EnemyInstaller : MonoInstaller
         if (!container.HasBinding<IAILaneJumperVisualAnimator>())
             container.Bind<IAILaneJumperVisualAnimator>().To<AILaneJumperVisualAnimator>().AsTransient();
 
+        if (!container.HasBinding<AILaneJumperEnemyController.Factory>())
+            container.BindFactory<IAILaneJumperEnemyView, AILaneJumperEnemyController, AILaneJumperEnemyController.Factory>().AsTransient();
+
         if (!container.HasBinding<ILaneTargetProvider>())
             container.Bind<ILaneTargetProvider>().To<PlayerLaneTargetProvider>().AsSingle();
 

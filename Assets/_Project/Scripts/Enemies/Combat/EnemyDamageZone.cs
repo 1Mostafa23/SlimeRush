@@ -41,9 +41,15 @@ public class EnemyDamageZone : MonoBehaviour
             return;
         }
 
-        bool wasKilled = slimeDamageApplier.KillSlime(slimeHitbox);
+        SlimeDamageResult damageResult = slimeDamageApplier.TryKillSlime(slimeHitbox);
 
-        if (!wasKilled)
+        if (damageResult == SlimeDamageResult.Blocked)
+        {
+            GetComponentInParent<IDamageBlockedReaction>()?.OnDamageBlocked();
+            return;
+        }
+
+        if (damageResult == SlimeDamageResult.NotFound)
             Debug.LogWarning($"EnemyDamageZone: SlimeHitbox '{slimeHitbox.name}' was not found in the active crowd.");
     }
 }
