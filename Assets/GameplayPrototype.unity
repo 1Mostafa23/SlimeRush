@@ -166,7 +166,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1436,8 +1436,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   m_RenderShadows: 1
   m_RequiresDepthTextureOption: 2
   m_RequiresOpaqueTextureOption: 2
@@ -2789,6 +2789,7 @@ MonoBehaviour:
   slimeCrowdManager: {fileID: 3765177816307229069}
   slimeCrowdSettings: {fileID: 11400000, guid: 65a9bb0ad7a14395856b68c27fd15c7e, type: 2}
   crowdFormationSettings: {fileID: 11400000, guid: 7d9b8b6fb4c14a0bb1f25f9c8b03e8f6, type: 2}
+  currencyWalletSettings: {fileID: 11400000, guid: 99305e6095f2411fb3871d1727c94ee6, type: 2}
   slimePrefabAddress: SlimePrefab
 --- !u!114 &670746527
 MonoBehaviour:
@@ -4072,6 +4073,7 @@ GameObject:
   - component: {fileID: 960427714}
   - component: {fileID: 960427716}
   - component: {fileID: 960427715}
+  - component: {fileID: 960427717}
   m_Layer: 0
   m_Name: TapToStartPanel
   m_TagString: Untagged
@@ -4138,6 +4140,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 960427713}
   m_CullTransparentMesh: 1
+--- !u!225 &960427717
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 960427713}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &978869453
 GameObject:
   m_ObjectHideFlags: 0
@@ -4698,6 +4712,81 @@ MonoBehaviour:
   adaptiveMaxScale: 8
   breakScaleMultiplier: 1.12
   breakDuration: 0.12
+--- !u!1 &1057279966
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1057279967}
+  - component: {fileID: 1057279969}
+  - component: {fileID: 1057279968}
+  m_Layer: 0
+  m_Name: DarkOverlay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1057279967
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1057279966}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1381261200}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1057279968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1057279966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.5764706}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1057279969
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1057279966}
+  m_CullTransparentMesh: 1
 --- !u!4 &1061323547 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4412951574391206365, guid: c97b7e5c1abc5bd43b38a35db01418cc, type: 3}
@@ -5573,6 +5662,8 @@ GameObject:
   - component: {fileID: 1381261203}
   - component: {fileID: 1381261202}
   - component: {fileID: 1381261201}
+  - component: {fileID: 1381261204}
+  - component: {fileID: 1381261205}
   m_Layer: 0
   m_Name: MainMenuCanvas
   m_TagString: Untagged
@@ -5592,6 +5683,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1057279967}
   - {fileID: 2074737864}
   - {fileID: 960427714}
   - {fileID: 190050964}
@@ -5643,6 +5735,50 @@ MonoBehaviour:
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
   m_PresetInfoIsWorld: 0
+--- !u!114 &1381261204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1381261199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2db3e66c4a2f4b59a72451ff86f34045, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  mainMenuCanvas: {fileID: 1381261199}
+  darkOverlay: {fileID: 1057279966}
+  tapToStartPanel: {fileID: 960427713}
+  tapToStartCanvasGroup: {fileID: 960427717}
+  tapFadeMinAlpha: 0.45
+  tapFadeMaxAlpha: 1
+  tapFadeSpeed: 1.8
+  playerCrowdControllerFallback: {fileID: 3765177816307229068}
+  levelText: {fileID: 1779679063}
+  currentLevel: 1
+  settingsButton: {fileID: 1487916716}
+  skinsButton: {fileID: 1430276780}
+  factoryButton: {fileID: 978869455}
+  battlePassButton: {fileID: 1545166405}
+  coinPlusButton: {fileID: 359716963}
+  gemPlusButton: {fileID: 1386375626}
+  buyButton: {fileID: 1382070364}
+  bottomOfferPanelButton: {fileID: 1850906179}
+--- !u!114 &1381261205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1381261199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15572bd5f45a45269f05cef6a57d7da5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  coinsText: {fileID: 1219764947}
+  gemsText: {fileID: 58295173}
 --- !u!223 &1381261203
 Canvas:
   m_ObjectHideFlags: 0
@@ -7201,6 +7337,7 @@ GameObject:
   - component: {fileID: 1850906176}
   - component: {fileID: 1850906178}
   - component: {fileID: 1850906177}
+  - component: {fileID: 1850906179}
   m_Layer: 0
   m_Name: BottomOfferPanel
   m_TagString: Untagged
@@ -7240,13 +7377,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1850906175}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -7271,6 +7408,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1850906175}
   m_CullTransparentMesh: 1
+--- !u!114 &1850906179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1850906175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 0
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 0}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1929032812
 GameObject:
   m_ObjectHideFlags: 0

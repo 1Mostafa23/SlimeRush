@@ -83,12 +83,17 @@ public class PlayerCrowdController : MonoBehaviour,
 
     public void StopMovement()
     {
-        isMoving = false;
+        SetInputEnabled(false);
     }
 
     public void StartMovement()
     {
-        isMoving = true;
+        SetInputEnabled(true);
+    }
+
+    public void SetInputEnabled(bool enabled)
+    {
+        isMoving = enabled;
     }
 
     public int GetSlimeCount()
