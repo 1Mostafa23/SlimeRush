@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 760fba0b6d04dc14785748696cfe80e2
+    m_Address: Enemies/LaneJumper
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 3d4e38fac441ca34ab754538c4428bc2, type: 2}
   m_SchemaSet:
