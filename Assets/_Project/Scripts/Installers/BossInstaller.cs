@@ -1,0 +1,74 @@
+using Zenject;
+
+public class BossInstaller : Installer<BossProjectile, BossRangedAttackSettings, BossInstaller>
+{
+    private readonly BossProjectile projectilePrefab;
+    private readonly BossRangedAttackSettings rangedAttackSettings;
+
+    public BossInstaller(BossProjectile projectilePrefab, BossRangedAttackSettings rangedAttackSettings)
+    {
+        this.projectilePrefab = projectilePrefab;
+        this.rangedAttackSettings = rangedAttackSettings;
+    }
+
+    private static void InstallInternal(
+        DiContainer container,
+        BossProjectile projectilePrefab,
+        BossRangedAttackSettings rangedAttackSettings)
+    {
+        if (!container.HasBinding<BossRangedAttackSettings>())
+            container.BindInstance(rangedAttackSettings).AsSingle();
+
+        if (!container.HasBinding<BossProjectile.Pool>())
+        {
+            container.BindMemoryPool<BossProjectile, BossProjectile.Pool>()
+                .WithInitialSize(rangedAttackSettings.ProjectilePoolInitialSize)
+                .FromComponentInNewPrefab(projectilePrefab)
+                .UnderTransformGroup("BossProjectilePool");
+        }
+
+        if (!container.HasBinding<BossCombatant>())
+            container.Bind<BossCombatant>().AsSingle().WithArguments(50);
+
+        if (!container.HasBinding<BossStateContext>())
+            container.Bind<BossStateContext>().AsSingle();
+
+        if (!container.HasBinding<BossIdleState>())
+            container.Bind<BossIdleState>().AsSingle();
+
+        if (!container.HasBinding<BossRangedState>())
+            container.Bind<BossRangedState>().AsSingle();
+
+        if (!container.HasBinding<BossClashState>())
+            container.Bind<BossClashState>().AsSingle();
+
+        if (!container.HasBinding<BossDefeatedState>())
+            container.Bind<BossDefeatedState>().AsSingle();
+
+        if (!container.HasBinding<IBossStateMachine>())
+            container.BindInterfacesAndSelfTo<BossStateMachine>().AsSingle();
+
+        if (!container.HasBinding<BossHitFeedback>())
+            container.Bind<BossHitFeedback>().FromComponentInHierarchy().AsSingle();
+
+        if (!container.HasBinding<BossDefeatView>())
+            container.Bind<BossDefeatView>().FromComponentInHierarchy().AsSingle();
+
+        if (!container.HasBinding<BossCameraController>())
+            container.Bind<BossCameraController>().FromComponentInHierarchy().AsSingle();
+
+        if (!container.HasBinding<BossRangedAttackController>())
+            container.Bind<BossRangedAttackController>().FromComponentInHierarchy().AsSingle();
+
+        if (!container.HasBinding<IBossRangedAttackController>())
+            container.Bind<IBossRangedAttackController>().To<BossRangedAttackController>().FromResolve();
+
+        if (!container.HasBinding<IBossFightService>())
+            container.BindInterfacesAndSelfTo<BossFightService>().AsSingle();
+    }
+
+    public override void InstallBindings()
+    {
+        InstallInternal(Container, projectilePrefab, rangedAttackSettings);
+    }
+}

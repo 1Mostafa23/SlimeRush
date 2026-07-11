@@ -12,6 +12,10 @@ public class GameplayInstaller : MonoInstaller
     [Header("Addressables")]
     [SerializeField] private string slimePrefabAddress = "SlimePrefab";
 
+    [Header("Boss")]
+    [SerializeField] private BossProjectile bossProjectilePrefab;
+    [SerializeField] private BossRangedAttackSettings bossRangedAttackSettings;
+
     public override void InstallBindings()
     {
         if (slimeCrowdManager == null)
@@ -44,6 +48,18 @@ public class GameplayInstaller : MonoInstaller
             return;
         }
 
+        if (bossProjectilePrefab == null)
+        {
+            Debug.LogError("GameplayInstaller: Boss projectile prefab is not assigned.");
+            return;
+        }
+
+        if (bossRangedAttackSettings == null)
+        {
+            Debug.LogError("GameplayInstaller: Boss ranged attack settings is not assigned.");
+            return;
+        }
+
         Container.BindInstance(new SlimePrefabAddress(slimePrefabAddress)).AsSingle();
         Container.Bind<ICurrencyWallet>().To<CurrencyWallet>().AsSingle().WithArguments(
             currencyWalletSettings.StartingCoins,
@@ -61,6 +77,7 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<ISlimeCrowd>().FromInstance(slimeCrowdManager).AsSingle();
         Container.Bind<ISlimeCrowdCommands>().FromInstance(slimeCrowdManager).AsSingle();
         Container.Bind<ISlimeCrowdDamageCommands>().FromInstance(slimeCrowdManager).AsSingle();
+        Container.Bind<IBossCrowdFormationController>().FromInstance(slimeCrowdManager).AsSingle();
         Container.Bind<ShieldInactiveState>().AsSingle();
         Container.Bind<ShieldActiveState>().AsSingle();
         Container.Bind<ShieldConsumedState>().AsSingle();
@@ -74,5 +91,6 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<GateOperationResolver>().AsSingle();
         Container.Bind<CrowdCountChangeApplier>().AsSingle();
         Container.Bind<IGateEffectApplier>().To<GateEffectApplier>().AsSingle();
+        BossInstaller.Install(Container, bossProjectilePrefab, bossRangedAttackSettings);
     }
 }

@@ -5,8 +5,13 @@ using UnityEngine;
 using Zenject;
 
 
-public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands, ISlimeCrowdDamageCommands
+public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands, ISlimeCrowdDamageCommands, IBossCrowdFormationController
 {
+    private const float BossFormationMoveSpeed = 8f;
+    private const float BossSemicircleSpacing = 0.85f;
+    private const float BossSemicircleStartAngle = -80f;
+    private const float BossSemicircleEndAngle = 80f;
+
     private readonly List<GameObject> slimes = new();
     private readonly List<Vector3> targetLocalPositions = new();
 
@@ -17,6 +22,7 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
     private ICrowdMovementStateMachine movementStateMachine;
     private CrowdFollowFormationState followFormationState;
     private bool isInitialized;
+    private bool isBossFormationActive;
     private int formationUpdateVersion;
 
     public int SlimeCount => slimes.Count;
@@ -151,10 +157,33 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
         AddSlimes(amountToAdd);
     }
 
+    public void EnterBossFormation(Transform fightPoint)
+    {
+        if (fightPoint == null)
+            return;
+
+        isBossFormationActive = true;
+        UpdateFormationTargets();
+        MoveToBossFightPointAsync(fightPoint).Forget();
+    }
+
+    public void ExitBossFormation()
+    {
+        if (!isBossFormationActive)
+            return;
+
+        isBossFormationActive = false;
+        UpdateFormationTargets();
+    }
+
     private void UpdateFormationTargets()
     {
         formationUpdateVersion++;
-        RebuildFormationTargets();
+
+        if (isBossFormationActive)
+            RebuildBossSemicircleTargets();
+        else
+            RebuildFormationTargets();
     }
 
     private void ScheduleDelayedFormationTargetsUpdate()
@@ -181,7 +210,10 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
             if (expectedVersion != formationUpdateVersion)
                 return;
 
-            RebuildFormationTargets();
+            if (isBossFormationActive)
+                RebuildBossSemicircleTargets();
+            else
+                RebuildFormationTargets();
         }
         catch (OperationCanceledException)
         {
@@ -197,6 +229,73 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
         {
             targetLocalPositions.Add(positions[i]);
             slimes[i].transform.localRotation = Quaternion.identity;
+        }
+    }
+
+    private void RebuildBossSemicircleTargets()
+    {
+        targetLocalPositions.Clear();
+
+        IReadOnlyList<Vector3> positions = GenerateBossSemicirclePositions(slimes.Count);
+
+        for (int i = 0; i < slimes.Count; i++)
+        {
+            targetLocalPositions.Add(positions[i]);
+            slimes[i].transform.localRotation = Quaternion.identity;
+        }
+    }
+
+    private IReadOnlyList<Vector3> GenerateBossSemicirclePositions(int count)
+    {
+        List<Vector3> positions = new();
+        int remaining = count;
+        int row = 0;
+
+        while (remaining > 0)
+        {
+            int capacity = Mathf.Min(remaining, 6 + row * 4);
+            float radius = BossSemicircleSpacing * (row + 1);
+
+            for (int i = 0; i < capacity; i++)
+            {
+                float t = capacity == 1 ? 0.5f : (float)i / (capacity - 1);
+                float angle = Mathf.Lerp(BossSemicircleStartAngle, BossSemicircleEndAngle, t) * Mathf.Deg2Rad;
+
+                positions.Add(new Vector3(
+                    Mathf.Sin(angle) * radius,
+                    0f,
+                    Mathf.Cos(angle) * radius));
+            }
+
+            remaining -= capacity;
+            row++;
+        }
+
+        return positions;
+    }
+
+    private async UniTaskVoid MoveToBossFightPointAsync(Transform fightPoint)
+    {
+        try
+        {
+            Vector3 targetPosition = fightPoint.position;
+            targetPosition.y = transform.position.y;
+
+            while (!destroyCancellationToken.IsCancellationRequested &&
+                   Vector3.SqrMagnitude(transform.position - targetPosition) > 0.01f)
+            {
+                transform.position = Vector3.MoveTowards(
+                    transform.position,
+                    targetPosition,
+                    BossFormationMoveSpeed * Time.deltaTime);
+
+                await UniTask.Yield(destroyCancellationToken);
+            }
+
+            transform.position = targetPosition;
+        }
+        catch (OperationCanceledException)
+        {
         }
     }
 
