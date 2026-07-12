@@ -1,18 +1,18 @@
 using System;
-using UnityEngine;
 
 public class CurrencyWallet : ICurrencyWallet
 {
-    public int Coins { get; private set; }
-    public int Gems { get; private set; }
+    private readonly IPlayerProfileService profileService;
+
+    public int Coins => profileService.Profile.coins;
+    public int Gems => profileService.Profile.gems;
 
     public event Action CoinsChanged;
     public event Action GemsChanged;
 
-    public CurrencyWallet(int startingCoins, int startingGems)
+    public CurrencyWallet(IPlayerProfileService profileService)
     {
-        Coins = Mathf.Max(0, startingCoins);
-        Gems = Mathf.Max(0, startingGems);
+        this.profileService = profileService;
     }
 
     public void AddCoins(int amount)
@@ -20,7 +20,8 @@ public class CurrencyWallet : ICurrencyWallet
         if (amount <= 0)
             return;
 
-        Coins += amount;
+        profileService.Profile.coins += amount;
+        Save();
         CoinsChanged?.Invoke();
     }
 
@@ -29,7 +30,8 @@ public class CurrencyWallet : ICurrencyWallet
         if (amount <= 0 || Coins < amount)
             return false;
 
-        Coins -= amount;
+        profileService.Profile.coins -= amount;
+        Save();
         CoinsChanged?.Invoke();
         return true;
     }
@@ -39,7 +41,8 @@ public class CurrencyWallet : ICurrencyWallet
         if (amount <= 0)
             return;
 
-        Gems += amount;
+        profileService.Profile.gems += amount;
+        Save();
         GemsChanged?.Invoke();
     }
 
@@ -48,8 +51,14 @@ public class CurrencyWallet : ICurrencyWallet
         if (amount <= 0 || Gems < amount)
             return false;
 
-        Gems -= amount;
+        profileService.Profile.gems -= amount;
+        Save();
         GemsChanged?.Invoke();
         return true;
+    }
+
+    private void Save()
+    {
+        profileService.Save();
     }
 }

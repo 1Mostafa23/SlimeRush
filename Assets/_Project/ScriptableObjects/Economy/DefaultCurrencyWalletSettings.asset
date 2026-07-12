@@ -11,6 +11,6 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c9d4e43e59eb4bd094b6ec74aa3d8713, type: 3}
   m_Name: DefaultCurrencyWalletSettings
-  m_EditorClassIdentifier:
-  startingCoins: 12580
-  startingGems: 860
+  m_EditorClassIdentifier: 
+  startingCoins: 0
+  startingGems: 0

@@ -45,8 +45,11 @@ public class EnemyInstaller : MonoInstaller
         if (!container.HasBinding<IEnemyDashSpeedProvider>())
             container.Bind<IEnemyDashSpeedProvider>().To<AdaptiveEnemyDashSpeedProvider>().AsSingle();
 
+        if (!container.HasBinding<DisableEnemyDefeatHandler>())
+            container.Bind<DisableEnemyDefeatHandler>().AsSingle();
+
         if (!container.HasBinding<IEnemyDefeatHandler>())
-            container.Bind<IEnemyDefeatHandler>().To<DisableEnemyDefeatHandler>().AsSingle();
+            container.Bind<IEnemyDefeatHandler>().To<RunStatsEnemyDefeatHandler>().AsSingle();
 
         if (!container.HasBinding<IPlayerPassedEnemyCondition>())
             container.Bind<IPlayerPassedEnemyCondition>().To<PlayerPassedEnemyCondition>().AsSingle();

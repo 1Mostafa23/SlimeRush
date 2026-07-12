@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: d4b657e65f924872977190a41c2b6a40
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - currencyWalletSettings: {fileID: 11400000, guid: 99305e6095f2411fb3871d1727c94ee6, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

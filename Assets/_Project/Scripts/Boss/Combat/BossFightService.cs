@@ -14,6 +14,8 @@ public class BossFightService : IBossFightService, ITickable
     private readonly BossCombatant bossCombatant;
     private readonly BossCameraController bossCameraController;
     private readonly BossHitFeedback bossHitFeedback;
+    private readonly IRunStatsService runStatsService;
+    private readonly IRunResultService runResultService;
 
     private Collider bossTrigger;
     private bool isFighting;
@@ -26,7 +28,9 @@ public class BossFightService : IBossFightService, ITickable
         IBossCrowdFormationController bossCrowdFormationController,
         BossCombatant bossCombatant,
         BossCameraController bossCameraController,
-        BossHitFeedback bossHitFeedback)
+        BossHitFeedback bossHitFeedback,
+        IRunStatsService runStatsService,
+        IRunResultService runResultService)
     {
         this.slimeCrowd = slimeCrowd;
         this.slimeCrowdCommands = slimeCrowdCommands;
@@ -35,6 +39,8 @@ public class BossFightService : IBossFightService, ITickable
         this.bossCombatant = bossCombatant;
         this.bossCameraController = bossCameraController;
         this.bossHitFeedback = bossHitFeedback;
+        this.runStatsService = runStatsService;
+        this.runResultService = runResultService;
     }
 
     public void StartCloseFight(Transform fightPoint, Collider bossTrigger)
@@ -85,6 +91,8 @@ public class BossFightService : IBossFightService, ITickable
             if (bossTrigger != null)
                 bossTrigger.enabled = false;
 
+            runStatsService.RegisterBossDefeated();
+            runResultService.CompleteRun();
             Debug.Log("BossFightService: Boss defeated. Victory/reward hook.");
             return;
         }

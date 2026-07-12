@@ -5416,6 +5416,7 @@ GameObject:
   - component: {fileID: 670746524}
   - component: {fileID: 670746526}
   - component: {fileID: 670746527}
+  - component: {fileID: 697256004}
   m_Layer: 0
   m_Name: SceneContext
   m_TagString: Untagged
@@ -5485,7 +5486,6 @@ MonoBehaviour:
   slimeCrowdManager: {fileID: 3765177816307229069}
   slimeCrowdSettings: {fileID: 11400000, guid: 65a9bb0ad7a14395856b68c27fd15c7e, type: 2}
   crowdFormationSettings: {fileID: 11400000, guid: 7d9b8b6fb4c14a0bb1f25f9c8b03e8f6, type: 2}
-  currencyWalletSettings: {fileID: 11400000, guid: 99305e6095f2411fb3871d1727c94ee6, type: 2}
   slimePrefabAddress: SlimePrefab
   bossProjectilePrefab: {fileID: 6291114234938916024, guid: e92aa443d59610447b715579a7f6763f, type: 3}
   bossRangedAttackSettings: {fileID: 11400000, guid: 6381da8c38f449ebae7912362f571926, type: 2}
@@ -5887,6 +5887,22 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &697256004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 670746523}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e453a8479e454dbaae9fd96a90ff432f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  victoryCanvas: {fileID: 697255999}
+  rewardAmountText: {fileID: 805957203}
+  nextLevelButton: {fileID: 153004895}
+  rewardAnimationDuration: 1
 --- !u!43 &745770666
 Mesh:
   m_ObjectHideFlags: 0

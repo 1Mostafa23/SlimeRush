@@ -7,7 +7,6 @@ public class GameplayInstaller : MonoInstaller
     [SerializeField] private SlimeCrowdManager slimeCrowdManager;
     [SerializeField] private SlimeCrowdSettings slimeCrowdSettings;
     [SerializeField] private CrowdFormationSettings crowdFormationSettings;
-    [SerializeField] private CurrencyWalletSettings currencyWalletSettings;
 
     [Header("Addressables")]
     [SerializeField] private string slimePrefabAddress = "SlimePrefab";
@@ -36,12 +35,6 @@ public class GameplayInstaller : MonoInstaller
             return;
         }
 
-        if (currencyWalletSettings == null)
-        {
-            Debug.LogError("GameplayInstaller: CurrencyWalletSettings is not assigned.");
-            return;
-        }
-
         if (string.IsNullOrWhiteSpace(slimePrefabAddress))
         {
             Debug.LogError("GameplayInstaller: Slime prefab address is not assigned.");
@@ -61,9 +54,9 @@ public class GameplayInstaller : MonoInstaller
         }
 
         Container.BindInstance(new SlimePrefabAddress(slimePrefabAddress)).AsSingle();
-        Container.Bind<ICurrencyWallet>().To<CurrencyWallet>().AsSingle().WithArguments(
-            currencyWalletSettings.StartingCoins,
-            currencyWalletSettings.StartingGems);
+        Container.Bind<IRunStatsService>().To<RunStatsService>().AsSingle();
+        Container.Bind<IRunRewardCalculator>().To<RunRewardCalculator>().AsSingle();
+        Container.Bind<IRunResultService>().To<RunResultService>().AsSingle();
         Container.Bind<ISlimeFactory>().To<AddressableSlimeFactory>().AsSingle();
         Container.Bind<ISlimePool>().To<SlimePool>().AsSingle();
         Container.BindInstance(slimeCrowdSettings).AsSingle();
