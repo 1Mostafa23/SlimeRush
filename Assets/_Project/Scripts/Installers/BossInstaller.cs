@@ -1,23 +1,32 @@
 using Zenject;
 
-public class BossInstaller : Installer<BossProjectile, BossRangedAttackSettings, BossInstaller>
+public class BossInstaller : Installer<BossProjectile, BossRangedAttackSettings, BossClashSettings, BossInstaller>
 {
     private readonly BossProjectile projectilePrefab;
     private readonly BossRangedAttackSettings rangedAttackSettings;
+    private readonly BossClashSettings clashSettings;
 
-    public BossInstaller(BossProjectile projectilePrefab, BossRangedAttackSettings rangedAttackSettings)
+    public BossInstaller(
+        BossProjectile projectilePrefab,
+        BossRangedAttackSettings rangedAttackSettings,
+        BossClashSettings clashSettings)
     {
         this.projectilePrefab = projectilePrefab;
         this.rangedAttackSettings = rangedAttackSettings;
+        this.clashSettings = clashSettings;
     }
 
     private static void InstallInternal(
         DiContainer container,
         BossProjectile projectilePrefab,
-        BossRangedAttackSettings rangedAttackSettings)
+        BossRangedAttackSettings rangedAttackSettings,
+        BossClashSettings clashSettings)
     {
         if (!container.HasBinding<BossRangedAttackSettings>())
             container.BindInstance(rangedAttackSettings).AsSingle();
+
+        if (!container.HasBinding<BossClashSettings>())
+            container.BindInstance(clashSettings).AsSingle();
 
         if (!container.HasBinding<BossProjectile.Pool>())
         {
@@ -69,6 +78,6 @@ public class BossInstaller : Installer<BossProjectile, BossRangedAttackSettings,
 
     public override void InstallBindings()
     {
-        InstallInternal(Container, projectilePrefab, rangedAttackSettings);
+        InstallInternal(Container, projectilePrefab, rangedAttackSettings, clashSettings);
     }
 }

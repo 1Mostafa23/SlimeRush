@@ -7,7 +7,7 @@ public class RunResultService : IRunResultService
     private readonly IRunRewardCalculator rewardCalculator;
     private readonly ICurrencyWallet currencyWallet;
 
-    private bool isCompleted;
+    public bool IsCompleted { get; private set; }
 
     public event Action<RunResultData> RunCompleted;
 
@@ -25,17 +25,22 @@ public class RunResultService : IRunResultService
 
     public void CompleteRun()
     {
-        if (isCompleted)
+        if (IsCompleted)
             return;
 
-        isCompleted = true;
+        IsCompleted = true;
 
         int remainingSlimes = slimeCrowd.SlimeCount;
         int defeatedEnemies = runStatsService.DefeatedEnemies;
         bool bossDefeated = runStatsService.BossDefeated;
-        int totalCoins = rewardCalculator.CalculateCoins(remainingSlimes, defeatedEnemies, bossDefeated);
+        RunResultType resultType = remainingSlimes <= 0
+            ? RunResultType.Defeat
+            : bossDefeated
+                ? RunResultType.Victory
+                : RunResultType.Defeat;
+        int totalCoins = rewardCalculator.CalculateCoins(resultType, remainingSlimes, defeatedEnemies, bossDefeated);
 
         currencyWallet.AddCoins(totalCoins);
-        RunCompleted?.Invoke(new RunResultData(remainingSlimes, defeatedEnemies, bossDefeated, totalCoins));
+        RunCompleted?.Invoke(new RunResultData(resultType, remainingSlimes, defeatedEnemies, bossDefeated, totalCoins));
     }
 }

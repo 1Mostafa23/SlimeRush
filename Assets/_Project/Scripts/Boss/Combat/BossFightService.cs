@@ -3,10 +3,6 @@ using Zenject;
 
 public class BossFightService : IBossFightService, ITickable
 {
-    private const int SlimeDamagePerTick = 5;
-    private const int BossDamagePerTick = 5;
-    private const float FightTickInterval = 1f;
-
     private readonly ISlimeCrowd slimeCrowd;
     private readonly ISlimeCrowdCommands slimeCrowdCommands;
     private readonly IPlayerCrowdMovementController playerMovementController;
@@ -16,6 +12,7 @@ public class BossFightService : IBossFightService, ITickable
     private readonly BossHitFeedback bossHitFeedback;
     private readonly IRunStatsService runStatsService;
     private readonly IRunResultService runResultService;
+    private readonly BossClashSettings clashSettings;
 
     private Collider bossTrigger;
     private bool isFighting;
@@ -30,7 +27,8 @@ public class BossFightService : IBossFightService, ITickable
         BossCameraController bossCameraController,
         BossHitFeedback bossHitFeedback,
         IRunStatsService runStatsService,
-        IRunResultService runResultService)
+        IRunResultService runResultService,
+        BossClashSettings clashSettings)
     {
         this.slimeCrowd = slimeCrowd;
         this.slimeCrowdCommands = slimeCrowdCommands;
@@ -41,6 +39,7 @@ public class BossFightService : IBossFightService, ITickable
         this.bossHitFeedback = bossHitFeedback;
         this.runStatsService = runStatsService;
         this.runResultService = runResultService;
+        this.clashSettings = clashSettings;
     }
 
     public void StartCloseFight(Transform fightPoint, Collider bossTrigger)
@@ -64,7 +63,7 @@ public class BossFightService : IBossFightService, ITickable
 
         elapsedTime += Time.deltaTime;
 
-        if (elapsedTime < FightTickInterval)
+        if (elapsedTime < clashSettings.FightTickInterval)
             return;
 
         elapsedTime = 0f;
@@ -73,34 +72,46 @@ public class BossFightService : IBossFightService, ITickable
 
     private void ApplyFightTick()
     {
-        if (slimeCrowd.SlimeCount <= 0)
+        int currentSlimeCount = slimeCrowd.SlimeCount;
+
+        if (currentSlimeCount <= 0)
         {
             StopCloseFight(false);
+            runResultService.CompleteRun();
             Debug.Log("BossFightService: Player crowd defeated. Defeat flow hook.");
             return;
         }
 
-        slimeCrowdCommands.RemoveSlimes(SlimeDamagePerTick);
-        bossCombatant.TakeDamage(BossDamagePerTick);
+        int nextSlimeCount = currentSlimeCount - clashSettings.SlimeDamagePerTick;
+
+        if (nextSlimeCount <= 0)
+        {
+            slimeCrowdCommands.RemoveSlimes(clashSettings.SlimeDamagePerTick);
+            StopCloseFight(false);
+            runResultService.CompleteRun();
+            Debug.Log("BossFightService: Player crowd defeated. Boss survives simultaneous lethal tick.");
+            return;
+        }
+
+        int nextBossHp = bossCombatant.CurrentHp - clashSettings.BossDamagePerTick;
+
+        slimeCrowdCommands.RemoveSlimes(clashSettings.SlimeDamagePerTick);
+        bossCombatant.TakeDamage(clashSettings.BossDamagePerTick);
         bossHitFeedback.PlayHit();
 
-        if (bossCombatant.IsDefeated)
+        if (nextBossHp <= 0)
+            runStatsService.RegisterBossDefeated();
+
+        if (nextBossHp <= 0)
         {
             StopCloseFight(true);
 
             if (bossTrigger != null)
                 bossTrigger.enabled = false;
 
-            runStatsService.RegisterBossDefeated();
             runResultService.CompleteRun();
             Debug.Log("BossFightService: Boss defeated. Victory/reward hook.");
             return;
-        }
-
-        if (slimeCrowd.SlimeCount <= 0)
-        {
-            StopCloseFight(false);
-            Debug.Log("BossFightService: Player crowd defeated. Defeat flow hook.");
         }
     }
 

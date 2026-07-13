@@ -14,6 +14,7 @@ public class GameplayInstaller : MonoInstaller
     [Header("Boss")]
     [SerializeField] private BossProjectile bossProjectilePrefab;
     [SerializeField] private BossRangedAttackSettings bossRangedAttackSettings;
+    [SerializeField] private BossClashSettings bossClashSettings;
 
     public override void InstallBindings()
     {
@@ -53,10 +54,17 @@ public class GameplayInstaller : MonoInstaller
             return;
         }
 
+        if (bossClashSettings == null)
+        {
+            Debug.LogError("GameplayInstaller: Boss clash settings is not assigned.");
+            return;
+        }
+
         Container.BindInstance(new SlimePrefabAddress(slimePrefabAddress)).AsSingle();
         Container.Bind<IRunStatsService>().To<RunStatsService>().AsSingle();
         Container.Bind<IRunRewardCalculator>().To<RunRewardCalculator>().AsSingle();
         Container.Bind<IRunResultService>().To<RunResultService>().AsSingle();
+        Container.BindInterfacesAndSelfTo<RunDefeatWatcher>().AsSingle();
         Container.Bind<ISlimeFactory>().To<AddressableSlimeFactory>().AsSingle();
         Container.Bind<ISlimePool>().To<SlimePool>().AsSingle();
         Container.BindInstance(slimeCrowdSettings).AsSingle();
@@ -84,6 +92,6 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<GateOperationResolver>().AsSingle();
         Container.Bind<CrowdCountChangeApplier>().AsSingle();
         Container.Bind<IGateEffectApplier>().To<GateEffectApplier>().AsSingle();
-        BossInstaller.Install(Container, bossProjectilePrefab, bossRangedAttackSettings);
+        BossInstaller.Install(Container, bossProjectilePrefab, bossRangedAttackSettings, bossClashSettings);
     }
 }

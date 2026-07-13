@@ -7,9 +7,14 @@ using Zenject;
 
 public class VictoryPanelPresenter : MonoBehaviour
 {
-    [SerializeField] private GameObject victoryCanvas;
-    [SerializeField] private TMP_Text rewardAmountText;
+    [SerializeField] private GameObject resultCanvas;
+    [SerializeField] private GameObject victoryPanel;
+    [SerializeField] private GameObject defeatPanel;
+    [SerializeField] private TMP_Text victoryRewardAmountText;
+    [SerializeField] private TMP_Text defeatRewardAmountText;
     [SerializeField] private Button nextLevelButton;
+    [SerializeField] private Button retryButton;
+    [SerializeField] private Button homeButton;
     [SerializeField] private float rewardAnimationDuration = 1f;
 
     private IRunResultService runResultService;
@@ -25,11 +30,19 @@ public class VictoryPanelPresenter : MonoBehaviour
 
     private void Awake()
     {
-        SetVictoryVisible(false);
-        SetRewardAmount(0);
+        SetResultVisible(false);
+        SetPanelsVisible(false, false);
+        SetRewardAmount(victoryRewardAmountText, 0);
+        SetRewardAmount(defeatRewardAmountText, 0);
 
         if (nextLevelButton != null)
             nextLevelButton.onClick.AddListener(ReturnToStartState);
+
+        if (retryButton != null)
+            retryButton.onClick.AddListener(RetryRun);
+
+        if (homeButton != null)
+            homeButton.onClick.AddListener(ReturnToStartState);
     }
 
     private void OnEnable()
@@ -52,18 +65,30 @@ public class VictoryPanelPresenter : MonoBehaviour
         if (nextLevelButton != null)
             nextLevelButton.onClick.RemoveListener(ReturnToStartState);
 
+        if (retryButton != null)
+            retryButton.onClick.RemoveListener(RetryRun);
+
+        if (homeButton != null)
+            homeButton.onClick.RemoveListener(ReturnToStartState);
+
         ResumeGameIfPaused();
     }
 
     private void ShowResult(RunResultData resultData)
     {
         PauseGame();
-        SetVictoryVisible(true);
+        SetResultVisible(true);
+        SetPanelsVisible(resultData.IsVictory, !resultData.IsVictory);
 
         if (rewardAnimation != null)
             StopCoroutine(rewardAnimation);
 
-        rewardAnimation = StartCoroutine(AnimateReward(resultData.TotalCoins));
+        TMP_Text rewardText = resultData.IsVictory
+            ? victoryRewardAmountText
+            : defeatRewardAmountText;
+
+        SetRewardAmount(rewardText, 0);
+        rewardAnimation = StartCoroutine(AnimateReward(rewardText, resultData.TotalCoins));
     }
 
     private void Subscribe()
@@ -84,7 +109,7 @@ public class VictoryPanelPresenter : MonoBehaviour
         isSubscribed = false;
     }
 
-    private IEnumerator AnimateReward(int targetCoins)
+    private IEnumerator AnimateReward(TMP_Text rewardText, int targetCoins)
     {
         float elapsedTime = 0f;
 
@@ -95,24 +120,33 @@ public class VictoryPanelPresenter : MonoBehaviour
                 ? 1f
                 : Mathf.Clamp01(elapsedTime / rewardAnimationDuration);
 
-            SetRewardAmount(Mathf.RoundToInt(Mathf.Lerp(0, targetCoins, progress)));
+            SetRewardAmount(rewardText, Mathf.RoundToInt(Mathf.Lerp(0, targetCoins, progress)));
             yield return null;
         }
 
-        SetRewardAmount(targetCoins);
+        SetRewardAmount(rewardText, targetCoins);
         rewardAnimation = null;
     }
 
-    private void SetVictoryVisible(bool visible)
+    private void SetResultVisible(bool visible)
     {
-        if (victoryCanvas != null)
-            victoryCanvas.SetActive(visible);
+        if (resultCanvas != null)
+            resultCanvas.SetActive(visible);
     }
 
-    private void SetRewardAmount(int amount)
+    private void SetPanelsVisible(bool victoryVisible, bool defeatVisible)
     {
-        if (rewardAmountText != null)
-            rewardAmountText.text = $"+{amount}";
+        if (victoryPanel != null)
+            victoryPanel.SetActive(victoryVisible);
+
+        if (defeatPanel != null)
+            defeatPanel.SetActive(defeatVisible);
+    }
+
+    private void SetRewardAmount(TMP_Text rewardText, int amount)
+    {
+        if (rewardText != null)
+            rewardText.text = $"+{amount}";
     }
 
     private void ReturnToStartState()
@@ -120,6 +154,11 @@ public class VictoryPanelPresenter : MonoBehaviour
         ResumeGameIfPaused();
         Scene currentScene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(currentScene.buildIndex);
+    }
+
+    private void RetryRun()
+    {
+        ReturnToStartState();
     }
 
     private void PauseGame()

@@ -36,14 +36,18 @@ public class MainMenuPresenter : MonoBehaviour
     [SerializeField] private Button bottomOfferPanelButton;
 
     private IPlayerCrowdMovementController playerMovementController;
+    private IMusicService musicService;
     private bool isGameplayStarted;
     private IPlayerCrowdMovementController PlayerMovementController =>
         playerMovementController ?? playerCrowdControllerFallback;
 
     [Inject]
-    private void Construct(IPlayerCrowdMovementController playerMovementController)
+    private void Construct(
+        IPlayerCrowdMovementController playerMovementController,
+        IMusicService musicService)
     {
         this.playerMovementController = playerMovementController;
+        this.musicService = musicService;
     }
 
     private void Awake()
@@ -57,6 +61,7 @@ public class MainMenuPresenter : MonoBehaviour
     private void Start()
     {
         PlayerMovementController?.SetInputEnabled(false);
+        musicService?.SetMenuMode();
     }
 
     private void Update()
@@ -82,12 +87,14 @@ public class MainMenuPresenter : MonoBehaviour
 
         isGameplayStarted = true;
         SetMenuVisible(false);
+        musicService?.SetGameplayMode();
         PlayerMovementController?.SetInputEnabled(true);
     }
 
     private void ShowMenu()
     {
         isGameplayStarted = false;
+        musicService?.SetMenuMode();
         SetMenuVisible(true);
     }
 
