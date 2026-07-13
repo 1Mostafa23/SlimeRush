@@ -8,8 +8,7 @@ public class BossFightService : IBossFightService, ITickable
     private readonly IPlayerCrowdMovementController playerMovementController;
     private readonly IBossCrowdFormationController bossCrowdFormationController;
     private readonly BossCombatant bossCombatant;
-    private readonly BossCameraController bossCameraController;
-    private readonly BossHitFeedback bossHitFeedback;
+    private readonly IBossRuntimeContext bossRuntimeContext;
     private readonly IRunStatsService runStatsService;
     private readonly IRunResultService runResultService;
     private readonly BossClashSettings clashSettings;
@@ -24,8 +23,7 @@ public class BossFightService : IBossFightService, ITickable
         IPlayerCrowdMovementController playerMovementController,
         IBossCrowdFormationController bossCrowdFormationController,
         BossCombatant bossCombatant,
-        BossCameraController bossCameraController,
-        BossHitFeedback bossHitFeedback,
+        IBossRuntimeContext bossRuntimeContext,
         IRunStatsService runStatsService,
         IRunResultService runResultService,
         BossClashSettings clashSettings)
@@ -35,8 +33,7 @@ public class BossFightService : IBossFightService, ITickable
         this.playerMovementController = playerMovementController;
         this.bossCrowdFormationController = bossCrowdFormationController;
         this.bossCombatant = bossCombatant;
-        this.bossCameraController = bossCameraController;
-        this.bossHitFeedback = bossHitFeedback;
+        this.bossRuntimeContext = bossRuntimeContext;
         this.runStatsService = runStatsService;
         this.runResultService = runResultService;
         this.clashSettings = clashSettings;
@@ -53,7 +50,7 @@ public class BossFightService : IBossFightService, ITickable
 
         playerMovementController.StopMovement();
         bossCrowdFormationController.EnterBossFormation(fightPoint);
-        bossCameraController.FocusOnBoss();
+        bossRuntimeContext.CameraController?.FocusOnBoss();
     }
 
     public void Tick()
@@ -97,7 +94,7 @@ public class BossFightService : IBossFightService, ITickable
 
         slimeCrowdCommands.RemoveSlimes(clashSettings.SlimeDamagePerTick);
         bossCombatant.TakeDamage(clashSettings.BossDamagePerTick);
-        bossHitFeedback.PlayHit();
+        bossRuntimeContext.HitFeedback?.PlayHit();
 
         if (nextBossHp <= 0)
             runStatsService.RegisterBossDefeated();
@@ -126,6 +123,6 @@ public class BossFightService : IBossFightService, ITickable
             playerMovementController.StartMovement();
 
         bossCrowdFormationController.ExitBossFormation();
-        bossCameraController.StopFocus();
+        bossRuntimeContext.CameraController?.StopFocus();
     }
 }

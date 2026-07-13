@@ -16,16 +16,30 @@ public class VictoryPanelPresenter : MonoBehaviour
     [SerializeField] private Button retryButton;
     [SerializeField] private Button homeButton;
     [SerializeField] private float rewardAnimationDuration = 1f;
+    [Header("Responsive Layout")]
+    [SerializeField] private float panelMaxWidthPercent = 0.96f;
+    [SerializeField] private float panelMaxHeightPercent = 0.9f;
+    [SerializeField] private float panelMinScale = 1.05f;
+    [SerializeField] private float panelMaxScale = 2.2f;
 
     private IRunResultService runResultService;
+    private ILevelProgressService levelProgressService;
+    private ILevelConfigProvider levelConfigProvider;
     private Coroutine rewardAnimation;
     private bool isSubscribed;
     private bool isPausedByVictory;
+    private Vector3 victoryPanelInitialScale = Vector3.one;
+    private Vector3 defeatPanelInitialScale = Vector3.one;
 
     [Inject]
-    private void Construct(IRunResultService runResultService)
+    private void Construct(
+        IRunResultService runResultService,
+        ILevelProgressService levelProgressService,
+        [Inject(Optional = true)] ILevelConfigProvider levelConfigProvider)
     {
         this.runResultService = runResultService;
+        this.levelProgressService = levelProgressService;
+        this.levelConfigProvider = levelConfigProvider;
     }
 
     private void Awake()
@@ -34,9 +48,10 @@ public class VictoryPanelPresenter : MonoBehaviour
         SetPanelsVisible(false, false);
         SetRewardAmount(victoryRewardAmountText, 0);
         SetRewardAmount(defeatRewardAmountText, 0);
+        CachePanelScales();
 
         if (nextLevelButton != null)
-            nextLevelButton.onClick.AddListener(ReturnToStartState);
+            nextLevelButton.onClick.AddListener(GoToNextLevel);
 
         if (retryButton != null)
             retryButton.onClick.AddListener(RetryRun);
@@ -63,7 +78,7 @@ public class VictoryPanelPresenter : MonoBehaviour
     private void OnDestroy()
     {
         if (nextLevelButton != null)
-            nextLevelButton.onClick.RemoveListener(ReturnToStartState);
+            nextLevelButton.onClick.RemoveListener(GoToNextLevel);
 
         if (retryButton != null)
             retryButton.onClick.RemoveListener(RetryRun);
@@ -79,6 +94,7 @@ public class VictoryPanelPresenter : MonoBehaviour
         PauseGame();
         SetResultVisible(true);
         SetPanelsVisible(resultData.IsVictory, !resultData.IsVictory);
+        ApplyResponsivePanelScale(resultData.IsVictory ? victoryPanel : defeatPanel);
 
         if (rewardAnimation != null)
             StopCoroutine(rewardAnimation);
@@ -143,6 +159,42 @@ public class VictoryPanelPresenter : MonoBehaviour
             defeatPanel.SetActive(defeatVisible);
     }
 
+    private void CachePanelScales()
+    {
+        if (victoryPanel != null)
+            victoryPanelInitialScale = victoryPanel.transform.localScale;
+
+        if (defeatPanel != null)
+            defeatPanelInitialScale = defeatPanel.transform.localScale;
+    }
+
+    private void ApplyResponsivePanelScale(GameObject panel)
+    {
+        if (resultCanvas == null || panel == null)
+            return;
+
+        RectTransform canvasRect = resultCanvas.GetComponent<RectTransform>();
+        RectTransform panelRect = panel.GetComponent<RectTransform>();
+
+        if (canvasRect == null || panelRect == null)
+            return;
+
+        Canvas.ForceUpdateCanvases();
+
+        Vector2 canvasSize = canvasRect.rect.size;
+        Vector2 panelSize = panelRect.sizeDelta;
+
+        if (canvasSize.x <= 0f || canvasSize.y <= 0f || panelSize.x <= 0f || panelSize.y <= 0f)
+            return;
+
+        float widthScale = canvasSize.x * panelMaxWidthPercent / panelSize.x;
+        float heightScale = canvasSize.y * panelMaxHeightPercent / panelSize.y;
+        float targetScale = Mathf.Clamp(Mathf.Min(widthScale, heightScale), panelMinScale, panelMaxScale);
+        Vector3 initialScale = panel == victoryPanel ? victoryPanelInitialScale : defeatPanelInitialScale;
+
+        panelRect.localScale = initialScale * targetScale;
+    }
+
     private void SetRewardAmount(TMP_Text rewardText, int amount)
     {
         if (rewardText != null)
@@ -154,6 +206,16 @@ public class VictoryPanelPresenter : MonoBehaviour
         ResumeGameIfPaused();
         Scene currentScene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(currentScene.buildIndex);
+    }
+
+    private void GoToNextLevel()
+    {
+        if (levelConfigProvider != null)
+            levelProgressService?.AdvanceToNextLevel(levelConfigProvider.MaxAvailableLevel);
+        else
+            levelProgressService?.AdvanceToNextLevel();
+
+        ReturnToStartState();
     }
 
     private void RetryRun()

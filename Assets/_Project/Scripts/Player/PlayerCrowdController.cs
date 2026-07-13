@@ -67,11 +67,12 @@ public class PlayerCrowdController : MonoBehaviour,
     private void MoveHorizontal()
     {
         Vector3 currentPosition = transform.position;
+        float followAmount = 1f - Mathf.Exp(-horizontalSpeed * Time.deltaTime);
 
         float newX = Mathf.Lerp(
             currentPosition.x,
             targetX,
-            horizontalSpeed * Time.deltaTime
+            followAmount
         );
 
         transform.position = new Vector3(

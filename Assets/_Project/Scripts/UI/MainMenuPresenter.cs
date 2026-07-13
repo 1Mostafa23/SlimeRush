@@ -23,7 +23,6 @@ public class MainMenuPresenter : MonoBehaviour
 
     [Header("Level")]
     [SerializeField] private TMP_Text levelText;
-    [SerializeField] private int currentLevel = 1;
 
     [Header("Buttons")]
     [SerializeField] private Button settingsButton;
@@ -37,6 +36,8 @@ public class MainMenuPresenter : MonoBehaviour
 
     private IPlayerCrowdMovementController playerMovementController;
     private IMusicService musicService;
+    private ILevelProgressService levelProgressService;
+    private ILevelConfigProvider levelConfigProvider;
     private bool isGameplayStarted;
     private IPlayerCrowdMovementController PlayerMovementController =>
         playerMovementController ?? playerCrowdControllerFallback;
@@ -44,10 +45,14 @@ public class MainMenuPresenter : MonoBehaviour
     [Inject]
     private void Construct(
         IPlayerCrowdMovementController playerMovementController,
-        IMusicService musicService)
+        IMusicService musicService,
+        ILevelProgressService levelProgressService,
+        [Inject(Optional = true)] ILevelConfigProvider levelConfigProvider)
     {
         this.playerMovementController = playerMovementController;
         this.musicService = musicService;
+        this.levelProgressService = levelProgressService;
+        this.levelConfigProvider = levelConfigProvider;
     }
 
     private void Awake()
@@ -116,7 +121,7 @@ public class MainMenuPresenter : MonoBehaviour
     private void UpdateLevelText()
     {
         if (levelText != null)
-            levelText.text = $"Level {currentLevel}";
+            levelText.text = $"Level {levelConfigProvider?.CurrentLevel ?? levelProgressService?.CurrentLevel ?? 1}";
     }
 
     private void CacheComponents()

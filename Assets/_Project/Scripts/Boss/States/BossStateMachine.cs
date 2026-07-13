@@ -93,16 +93,16 @@ public class BossDefeatedState : IBossState
 {
     private readonly BossStateContext context;
     private readonly IBossFightService bossFightService;
-    private readonly BossDefeatView bossDefeatView;
+    private readonly IBossRuntimeContext bossRuntimeContext;
 
     public BossDefeatedState(
         BossStateContext context,
         IBossFightService bossFightService,
-        BossDefeatView bossDefeatView)
+        IBossRuntimeContext bossRuntimeContext)
     {
         this.context = context;
         this.bossFightService = bossFightService;
-        this.bossDefeatView = bossDefeatView;
+        this.bossRuntimeContext = bossRuntimeContext;
     }
 
     public void Enter()
@@ -112,7 +112,7 @@ public class BossDefeatedState : IBossState
         if (context.BossTrigger != null)
             context.BossTrigger.enabled = false;
 
-        bossDefeatView.HideBoss();
+        bossRuntimeContext.DefeatView?.HideBoss();
     }
 
     public void Exit()

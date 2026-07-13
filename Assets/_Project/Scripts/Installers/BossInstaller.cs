@@ -39,6 +39,9 @@ public class BossInstaller : Installer<BossProjectile, BossRangedAttackSettings,
         if (!container.HasBinding<BossCombatant>())
             container.Bind<BossCombatant>().AsSingle().WithArguments(50);
 
+        if (!container.HasBinding<IBossRuntimeContext>())
+            container.Bind<IBossRuntimeContext>().To<BossRuntimeContext>().AsSingle();
+
         if (!container.HasBinding<BossStateContext>())
             container.Bind<BossStateContext>().AsSingle();
 
@@ -56,21 +59,6 @@ public class BossInstaller : Installer<BossProjectile, BossRangedAttackSettings,
 
         if (!container.HasBinding<IBossStateMachine>())
             container.BindInterfacesAndSelfTo<BossStateMachine>().AsSingle();
-
-        if (!container.HasBinding<BossHitFeedback>())
-            container.Bind<BossHitFeedback>().FromComponentInHierarchy().AsSingle();
-
-        if (!container.HasBinding<BossDefeatView>())
-            container.Bind<BossDefeatView>().FromComponentInHierarchy().AsSingle();
-
-        if (!container.HasBinding<BossCameraController>())
-            container.Bind<BossCameraController>().FromComponentInHierarchy().AsSingle();
-
-        if (!container.HasBinding<BossRangedAttackController>())
-            container.Bind<BossRangedAttackController>().FromComponentInHierarchy().AsSingle();
-
-        if (!container.HasBinding<IBossRangedAttackController>())
-            container.Bind<IBossRangedAttackController>().To<BossRangedAttackController>().FromResolve();
 
         if (!container.HasBinding<IBossFightService>())
             container.BindInterfacesAndSelfTo<BossFightService>().AsSingle();

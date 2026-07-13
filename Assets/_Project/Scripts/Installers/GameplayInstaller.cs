@@ -16,6 +16,12 @@ public class GameplayInstaller : MonoInstaller
     [SerializeField] private BossRangedAttackSettings bossRangedAttackSettings;
     [SerializeField] private BossClashSettings bossClashSettings;
 
+    [Header("Level Generation")]
+    [SerializeField] private LevelConfigLibrary levelConfigLibrary;
+    [SerializeField] private Transform generatedLevelRoot;
+    [SerializeField] private bool generateLevelOnStart;
+    [SerializeField] private bool clearGeneratedRootBeforeGeneration = true;
+
     public override void InstallBindings()
     {
         if (slimeCrowdManager == null)
@@ -92,6 +98,21 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<GateOperationResolver>().AsSingle();
         Container.Bind<CrowdCountChangeApplier>().AsSingle();
         Container.Bind<IGateEffectApplier>().To<GateEffectApplier>().AsSingle();
+        InstallLevelGeneration();
         BossInstaller.Install(Container, bossProjectilePrefab, bossRangedAttackSettings, bossClashSettings);
+    }
+
+    private void InstallLevelGeneration()
+    {
+        if (levelConfigLibrary == null)
+            return;
+
+        Container.BindInstance(levelConfigLibrary).AsSingle();
+        Container.BindInstance(new LevelGenerationRuntimeSettings(
+            generatedLevelRoot,
+            generateLevelOnStart,
+            clearGeneratedRootBeforeGeneration)).AsSingle();
+        Container.Bind<ILevelConfigProvider>().To<LevelConfigProvider>().AsSingle();
+        Container.BindInterfacesAndSelfTo<LevelGeneratorService>().AsSingle();
     }
 }

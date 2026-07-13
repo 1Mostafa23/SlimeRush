@@ -25,6 +25,7 @@ public class ProjectInstaller : MonoInstaller
         Container.BindInstance(currencyWalletSettings).AsSingle();
         Container.Bind<IPlayerProfileStorage>().To<JsonPlayerProfileStorage>().AsSingle();
         Container.Bind<IPlayerProfileService>().To<PlayerProfileService>().AsSingle();
+        Container.Bind<ILevelProgressService>().To<LevelProgressService>().AsSingle();
         Container.Bind<ICurrencyWallet>().To<CurrencyWallet>().AsSingle();
         Container.BindInstance(musicClip).AsSingle();
         Container.BindInstance(new MusicSettings(menuMusicVolume, gameplayMusicVolume, musicFadeDuration)).AsSingle();

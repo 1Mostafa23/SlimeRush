@@ -15,11 +15,12 @@ public class CameraFollow : MonoBehaviour
             return;
 
         Vector3 desiredPosition = target.position + offset;
+        float followAmount = 1f - Mathf.Exp(-smoothSpeed * Time.deltaTime);
 
         transform.position = Vector3.Lerp(
             transform.position,
             desiredPosition,
-            smoothSpeed * Time.deltaTime
+            followAmount
         );
     }
 

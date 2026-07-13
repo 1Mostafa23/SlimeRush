@@ -1,20 +1,20 @@
 public class BossRangedState : IBossState
 {
-    private readonly IBossRangedAttackController rangedAttackController;
+    private readonly IBossRuntimeContext bossRuntimeContext;
 
-    public BossRangedState(IBossRangedAttackController rangedAttackController)
+    public BossRangedState(IBossRuntimeContext bossRuntimeContext)
     {
-        this.rangedAttackController = rangedAttackController;
+        this.bossRuntimeContext = bossRuntimeContext;
     }
 
     public void Enter()
     {
-        rangedAttackController.StartShooting();
+        bossRuntimeContext.RangedAttackController?.StartShooting();
     }
 
     public void Exit()
     {
-        rangedAttackController.StopShooting();
+        bossRuntimeContext.RangedAttackController?.StopShooting();
     }
 
     public void Tick(float deltaTime)
