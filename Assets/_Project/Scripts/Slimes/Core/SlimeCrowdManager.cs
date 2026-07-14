@@ -21,6 +21,7 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
     private ISlimePool slimePool;
     private ICrowdMovementStateMachine movementStateMachine;
     private CrowdFollowFormationState followFormationState;
+    private IPlayerUpgradeService playerUpgradeService;
     private bool isInitialized;
     private bool isBossFormationActive;
     private int formationUpdateVersion;
@@ -36,7 +37,8 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
         ISlimeFactory slimeFactory,
         ISlimePool slimePool,
         ICrowdMovementStateMachine movementStateMachine,
-        CrowdFollowFormationState followFormationState)
+        CrowdFollowFormationState followFormationState,
+        IPlayerUpgradeService playerUpgradeService)
     {
         this.settings = settings;
         this.crowdFormation = crowdFormation;
@@ -44,6 +46,7 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
         this.slimePool = slimePool;
         this.movementStateMachine = movementStateMachine;
         this.followFormationState = followFormationState;
+        this.playerUpgradeService = playerUpgradeService;
     }
 
     private void Start()
@@ -81,8 +84,9 @@ public class SlimeCrowdManager : MonoBehaviour, ISlimeCrowd, ISlimeCrowdCommands
     private void CreateStartingCrowd()
     {
         ClearCrowd();
-        Debug.Log($"SlimeCrowdManager: Starting slime count from {settings.name} = {settings.StartingSlimeCount}");
-        AddSlimes(settings.StartingSlimeCount);
+        int startingSlimeCount = playerUpgradeService.GetStartingSlimeCount(settings.StartingSlimeCount);
+        Debug.Log($"SlimeCrowdManager: Starting slime count from {settings.name} = {startingSlimeCount}");
+        AddSlimes(startingSlimeCount);
     }
 
     public void AddSlimes(int amount)

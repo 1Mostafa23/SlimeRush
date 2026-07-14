@@ -38,6 +38,7 @@ public class PlayerProfileService : IPlayerProfileService
         profileData.coins = Mathf.Max(0, profileData.coins);
         profileData.gems = Mathf.Max(0, profileData.gems);
         profileData.currentLevel = Mathf.Max(1, profileData.currentLevel);
+        profileData.slimeCountUpgradeLevel = Mathf.Max(0, profileData.slimeCountUpgradeLevel);
         return profileData;
     }
 }

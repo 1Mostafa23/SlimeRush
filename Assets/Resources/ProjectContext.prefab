@@ -66,6 +66,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currencyWalletSettings: {fileID: 11400000, guid: 99305e6095f2411fb3871d1727c94ee6, type: 2}
+  slimeCountUpgradeSettings: {fileID: 11400000, guid: 3ec57a08aa844824857d2effc87b47dc, type: 2}
   musicClip: {fileID: 8300000, guid: 8645ea9843914f042bda5daaa070fa8f, type: 3}
   menuMusicVolume: 0.08
   gameplayMusicVolume: 0.18

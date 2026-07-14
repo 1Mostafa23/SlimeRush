@@ -11,6 +11,7 @@ public class PlayerCrowdController : MonoBehaviour,
     [Header("Horizontal Movement")]
     [SerializeField] private float horizontalSpeed = 8f;
     [SerializeField] private float horizontalLimit = 3f;
+    [SerializeField, Min(0.1f)] private float horizontalInputSensitivity = 1.35f;
 
     private bool isMoving = true;
     private float targetX;
@@ -53,6 +54,7 @@ public class PlayerCrowdController : MonoBehaviour,
     private void SetTargetXFromScreenPosition(Vector2 screenPosition)
     {
         float screenPercent = screenPosition.x / Screen.width;
+        screenPercent = Mathf.Clamp01(0.5f + (screenPercent - 0.5f) * horizontalInputSensitivity);
         float normalizedX = Mathf.Lerp(-horizontalLimit, horizontalLimit, screenPercent);
 
         targetX = Mathf.Clamp(normalizedX, -horizontalLimit, horizontalLimit);

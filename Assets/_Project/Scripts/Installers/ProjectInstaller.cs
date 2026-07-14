@@ -4,6 +4,7 @@ using Zenject;
 public class ProjectInstaller : MonoInstaller
 {
     [SerializeField] private CurrencyWalletSettings currencyWalletSettings;
+    [SerializeField] private SlimeCountUpgradeSettings slimeCountUpgradeSettings;
 
     [Header("Music")]
     [SerializeField] private AudioClip musicClip;
@@ -19,14 +20,22 @@ public class ProjectInstaller : MonoInstaller
             return;
         }
 
+        if (slimeCountUpgradeSettings == null)
+        {
+            Debug.LogError("ProjectInstaller: SlimeCountUpgradeSettings is not assigned.");
+            return;
+        }
+
         if (musicClip == null)
             Debug.LogWarning("ProjectInstaller: Music clip is not assigned.");
 
         Container.BindInstance(currencyWalletSettings).AsSingle();
+        Container.BindInstance(slimeCountUpgradeSettings).AsSingle();
         Container.Bind<IPlayerProfileStorage>().To<JsonPlayerProfileStorage>().AsSingle();
         Container.Bind<IPlayerProfileService>().To<PlayerProfileService>().AsSingle();
         Container.Bind<ILevelProgressService>().To<LevelProgressService>().AsSingle();
         Container.Bind<ICurrencyWallet>().To<CurrencyWallet>().AsSingle();
+        Container.Bind<IPlayerUpgradeService>().To<PlayerUpgradeService>().AsSingle();
         Container.BindInstance(musicClip).AsSingle();
         Container.BindInstance(new MusicSettings(menuMusicVolume, gameplayMusicVolume, musicFadeDuration)).AsSingle();
         Container.BindInterfacesAndSelfTo<MusicService>().AsSingle();
