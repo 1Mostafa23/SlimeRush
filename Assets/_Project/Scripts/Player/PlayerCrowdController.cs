@@ -12,8 +12,13 @@ public class PlayerCrowdController : MonoBehaviour,
     [SerializeField] private float horizontalSpeed = 8f;
     [SerializeField] private float horizontalLimit = 3f;
     [SerializeField, Min(0.1f)] private float horizontalInputSensitivity = 1.35f;
+    [SerializeField, Min(0f)] private float dragStartThresholdPixels = 12f;
 
     private bool isMoving = true;
+    private bool isTouchDragging;
+    private bool isMouseDragging;
+    private Vector2 touchStartPosition;
+    private Vector2 mouseStartPosition;
     private float targetX;
 
     public float ForwardSpeed => isMoving ? forwardSpeed : 0f;
@@ -39,17 +44,67 @@ public class PlayerCrowdController : MonoBehaviour,
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
-            SetTargetXFromScreenPosition(touch.position);
+            HandleTouchInput(touch);
             return;
         }
 
+        isTouchDragging = false;
+
 #if UNITY_EDITOR
-        if (Input.GetMouseButton(0))
-        {
-            SetTargetXFromScreenPosition(Input.mousePosition);
-        }
+        HandleMouseInput();
 #endif
     }
+
+    private void HandleTouchInput(Touch touch)
+    {
+        if (touch.phase == TouchPhase.Began)
+        {
+            touchStartPosition = touch.position;
+            isTouchDragging = false;
+            return;
+        }
+
+        if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+        {
+            isTouchDragging = false;
+            return;
+        }
+
+        if (!isTouchDragging)
+            isTouchDragging = Vector2.Distance(touch.position, touchStartPosition) >= dragStartThresholdPixels;
+
+        if (isTouchDragging)
+            SetTargetXFromScreenPosition(touch.position);
+    }
+
+#if UNITY_EDITOR
+    private void HandleMouseInput()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            mouseStartPosition = Input.mousePosition;
+            isMouseDragging = false;
+            return;
+        }
+
+        if (Input.GetMouseButtonUp(0))
+        {
+            isMouseDragging = false;
+            return;
+        }
+
+        if (!Input.GetMouseButton(0))
+            return;
+
+        Vector2 mousePosition = Input.mousePosition;
+
+        if (!isMouseDragging)
+            isMouseDragging = Vector2.Distance(mousePosition, mouseStartPosition) >= dragStartThresholdPixels;
+
+        if (isMouseDragging)
+            SetTargetXFromScreenPosition(mousePosition);
+    }
+#endif
 
     private void SetTargetXFromScreenPosition(Vector2 screenPosition)
     {

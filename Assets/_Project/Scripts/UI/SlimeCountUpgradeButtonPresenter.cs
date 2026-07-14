@@ -7,21 +7,20 @@ public class SlimeCountUpgradeButtonPresenter : MonoBehaviour
 {
     [SerializeField] private Button button;
     [SerializeField] private TMP_Text labelText;
+    [SerializeField] private CanvasGroup visualGroup;
+    [SerializeField, Range(0.1f, 1f)] private float disabledAlpha = 0.45f;
 
     private IPlayerUpgradeService upgradeService;
     private ICurrencyWallet currencyWallet;
-    private ISlimeCrowdCommands slimeCrowdCommands;
     private bool isSubscribed;
 
     [Inject]
     private void Construct(
         IPlayerUpgradeService upgradeService,
-        ICurrencyWallet currencyWallet,
-        ISlimeCrowdCommands slimeCrowdCommands)
+        ICurrencyWallet currencyWallet)
     {
         this.upgradeService = upgradeService;
         this.currencyWallet = currencyWallet;
-        this.slimeCrowdCommands = slimeCrowdCommands;
     }
 
     private void Awake()
@@ -31,6 +30,15 @@ public class SlimeCountUpgradeButtonPresenter : MonoBehaviour
 
         if (labelText == null)
             labelText = GetComponentInChildren<TMP_Text>(true);
+
+        if (visualGroup == null)
+            visualGroup = GetComponent<CanvasGroup>();
+
+        if (visualGroup == null)
+            visualGroup = gameObject.AddComponent<CanvasGroup>();
+
+        if (disabledAlpha <= 0f)
+            disabledAlpha = 0.45f;
 
         ConfigureLabel();
 
@@ -69,13 +77,7 @@ public class SlimeCountUpgradeButtonPresenter : MonoBehaviour
         bool bought = upgradeService.TryBuySlimeCountUpgrade();
 
         if (!bought)
-        {
             Debug.Log("Not enough coins for Slime Count upgrade.");
-        }
-        else
-        {
-            slimeCrowdCommands?.AddSlimes(upgradeService.SlimesPerUpgrade);
-        }
 
         Refresh();
     }
@@ -153,5 +155,8 @@ public class SlimeCountUpgradeButtonPresenter : MonoBehaviour
     {
         if (button != null)
             button.interactable = value;
+
+        if (visualGroup != null)
+            visualGroup.alpha = value ? 1f : disabledAlpha;
     }
 }

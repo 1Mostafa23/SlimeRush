@@ -94,6 +94,7 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<ISlimeCrowdCommands>().FromInstance(slimeCrowdManager).AsSingle();
         Container.Bind<ISlimeCrowdDamageCommands>().FromInstance(slimeCrowdManager).AsSingle();
         Container.Bind<IBossCrowdFormationController>().FromInstance(slimeCrowdManager).AsSingle();
+        Container.BindInterfacesTo<PlayerUpgradeRuntimeApplier>().AsSingle().NonLazy();
         Container.Bind<ShieldInactiveState>().AsSingle();
         Container.Bind<ShieldActiveState>().AsSingle();
         Container.Bind<ShieldConsumedState>().AsSingle();

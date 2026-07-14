@@ -6381,6 +6381,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SlimeCountUpgradeButtonPresenter
   button: {fileID: 870835602}
   labelText: {fileID: 1794471284}
+  visualGroup: {fileID: 0}
+  disabledAlpha: 0.45
 --- !u!1 &882322136
 GameObject:
   m_ObjectHideFlags: 0
@@ -11643,7 +11645,7 @@ MonoBehaviour:
   m_charWidthMaxAdj: 0
   m_TextWrappingMode: 0
   m_wordWrappingRatios: 0.4
-  m_overflowMode: 1
+  m_overflowMode: 3
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 0
@@ -14320,6 +14322,7 @@ MonoBehaviour:
   horizontalSpeed: 8
   horizontalLimit: 4
   horizontalInputSensitivity: 1.45
+  dragStartThresholdPixels: 12
 --- !u!114 &3765177816307229069
 MonoBehaviour:
   m_ObjectHideFlags: 0
