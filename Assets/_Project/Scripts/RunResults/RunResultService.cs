@@ -6,6 +6,7 @@ public class RunResultService : IRunResultService
     private readonly IRunStatsService runStatsService;
     private readonly IRunRewardCalculator rewardCalculator;
     private readonly ICurrencyWallet currencyWallet;
+    private readonly ISfxService sfxService;
 
     public bool IsCompleted { get; private set; }
 
@@ -15,12 +16,14 @@ public class RunResultService : IRunResultService
         ISlimeCrowd slimeCrowd,
         IRunStatsService runStatsService,
         IRunRewardCalculator rewardCalculator,
-        ICurrencyWallet currencyWallet)
+        ICurrencyWallet currencyWallet,
+        ISfxService sfxService)
     {
         this.slimeCrowd = slimeCrowd;
         this.runStatsService = runStatsService;
         this.rewardCalculator = rewardCalculator;
         this.currencyWallet = currencyWallet;
+        this.sfxService = sfxService;
     }
 
     public void CompleteRun()
@@ -41,6 +44,9 @@ public class RunResultService : IRunResultService
         int totalCoins = rewardCalculator.CalculateCoins(resultType, remainingSlimes, defeatedEnemies, bossDefeated);
 
         currencyWallet.AddCoins(totalCoins);
+        if (resultType == RunResultType.Victory)
+            sfxService.PlayVictoryReward();
+
         RunCompleted?.Invoke(new RunResultData(resultType, remainingSlimes, defeatedEnemies, bossDefeated, totalCoins));
     }
 }

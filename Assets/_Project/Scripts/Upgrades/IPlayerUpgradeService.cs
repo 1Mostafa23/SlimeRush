@@ -11,4 +11,5 @@ public interface IPlayerUpgradeService
 
     int GetStartingSlimeCount(int baseSlimeCount);
     bool TryBuySlimeCountUpgrade();
+    void SetSlimeCountUpgradeLevel(int level);
 }

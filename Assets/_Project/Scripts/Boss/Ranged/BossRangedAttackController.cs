@@ -8,8 +8,8 @@ public class BossRangedAttackController : MonoBehaviour, IBossRangedAttackContro
     [SerializeField] private Transform firePointCenter;
     [SerializeField] private Transform firePointRight;
     [SerializeField] private Transform visual;
+    [SerializeField] private Vector3 shootDirection = Vector3.back;
 
-    private PlayerCrowdController playerCrowdController;
     private BossProjectile.Pool projectilePool;
     private BossRangedAttackSettings settings;
     private Coroutine shootRoutine;
@@ -17,11 +17,9 @@ public class BossRangedAttackController : MonoBehaviour, IBossRangedAttackContro
 
     [Inject]
     private void Construct(
-        PlayerCrowdController playerCrowdController,
         BossProjectile.Pool projectilePool,
         BossRangedAttackSettings settings)
     {
-        this.playerCrowdController = playerCrowdController;
         this.projectilePool = projectilePool;
         this.settings = settings;
     }
@@ -84,8 +82,9 @@ public class BossRangedAttackController : MonoBehaviour, IBossRangedAttackContro
         if (firePoint == null)
             return;
 
-        Vector3 direction = ResolveShootDirection(firePoint);
-        projectilePool.Spawn(firePoint.position, firePoint.rotation, direction);
+        Vector3 direction = ResolveShootDirection();
+        Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+        projectilePool.Spawn(firePoint.position, rotation, direction);
     }
 
     private bool HasFirePoint()
@@ -93,9 +92,9 @@ public class BossRangedAttackController : MonoBehaviour, IBossRangedAttackContro
         return firePointLeft != null || firePointCenter != null || firePointRight != null;
     }
 
-    private Vector3 ResolveShootDirection(Transform firePoint)
+    private Vector3 ResolveShootDirection()
     {
-        Vector3 direction = -firePoint.forward;
+        Vector3 direction = shootDirection;
         direction.y = 0f;
 
         if (direction.sqrMagnitude > 0.01f)

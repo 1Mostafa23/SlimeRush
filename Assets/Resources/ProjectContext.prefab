@@ -69,5 +69,10 @@ MonoBehaviour:
   slimeCountUpgradeSettings: {fileID: 11400000, guid: 3ec57a08aa844824857d2effc87b47dc, type: 2}
   musicClip: {fileID: 8300000, guid: 8645ea9843914f042bda5daaa070fa8f, type: 3}
   menuMusicVolume: 0.08
-  gameplayMusicVolume: 0.18
+  gameplayMusicVolume: 0.14
   musicFadeDuration: 0.5
+  slimeIncreaseClip: {fileID: 8300000, guid: 004fc615a0d4b2244979270b99cf4f17, type: 3}
+  slimeCountUpgradeBoughtClip: {fileID: 8300000, guid: 3d5ee9c31bd41874aaaafd1005f1bfd3, type: 3}
+  victoryRewardClip: {fileID: 8300000, guid: d2faa2723cd3c704594d978914517475, type: 3}
+  slimeIncreaseSfxVolume: 0.055
+  uiSfxVolume: 0.035

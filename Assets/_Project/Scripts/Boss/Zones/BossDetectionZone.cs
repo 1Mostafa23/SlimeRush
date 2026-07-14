@@ -1,8 +1,11 @@
 using UnityEngine;
 using Zenject;
+using System.Collections.Generic;
 
 public class BossDetectionZone : MonoBehaviour
 {
+    private readonly Dictionary<PlayerCrowdMarker, int> playerCrowdOverlaps = new();
+
     private IBossStateMachine bossStateMachine;
 
     [Inject]
@@ -13,19 +16,43 @@ public class BossDetectionZone : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (IsPlayerCrowd(other))
+        PlayerCrowdMarker marker = ResolvePlayerCrowdMarker(other);
+
+        if (marker == null)
+            return;
+
+        bool wasEmpty = playerCrowdOverlaps.Count == 0;
+
+        if (!playerCrowdOverlaps.TryAdd(marker, 1))
+            playerCrowdOverlaps[marker]++;
+
+        if (wasEmpty)
             bossStateMachine.StartRangedPhase();
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (IsPlayerCrowd(other))
+        PlayerCrowdMarker marker = ResolvePlayerCrowdMarker(other);
+
+        if (marker == null || !playerCrowdOverlaps.TryGetValue(marker, out int overlapCount))
+            return;
+
+        overlapCount--;
+
+        if (overlapCount <= 0)
+            playerCrowdOverlaps.Remove(marker);
+        else
+            playerCrowdOverlaps[marker] = overlapCount;
+
+        if (playerCrowdOverlaps.Count == 0)
             bossStateMachine.StopRangedPhase();
     }
 
-    private bool IsPlayerCrowd(Collider other)
+    private PlayerCrowdMarker ResolvePlayerCrowdMarker(Collider other)
     {
-        return other.TryGetComponent(out PlayerCrowdMarker _) ||
-               other.GetComponentInParent<PlayerCrowdMarker>() != null;
+        if (other.TryGetComponent(out PlayerCrowdMarker marker))
+            return marker;
+
+        return other.GetComponentInParent<PlayerCrowdMarker>();
     }
 }

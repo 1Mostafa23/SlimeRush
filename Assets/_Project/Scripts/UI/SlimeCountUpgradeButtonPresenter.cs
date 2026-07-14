@@ -12,15 +12,18 @@ public class SlimeCountUpgradeButtonPresenter : MonoBehaviour
 
     private IPlayerUpgradeService upgradeService;
     private ICurrencyWallet currencyWallet;
+    private ISfxService sfxService;
     private bool isSubscribed;
 
     [Inject]
     private void Construct(
         IPlayerUpgradeService upgradeService,
-        ICurrencyWallet currencyWallet)
+        ICurrencyWallet currencyWallet,
+        ISfxService sfxService)
     {
         this.upgradeService = upgradeService;
         this.currencyWallet = currencyWallet;
+        this.sfxService = sfxService;
     }
 
     private void Awake()
@@ -78,6 +81,8 @@ public class SlimeCountUpgradeButtonPresenter : MonoBehaviour
 
         if (!bought)
             Debug.Log("Not enough coins for Slime Count upgrade.");
+        else
+            sfxService.PlaySlimeCountUpgradeBought();
 
         Refresh();
     }

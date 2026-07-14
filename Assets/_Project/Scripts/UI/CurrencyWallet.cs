@@ -36,12 +36,26 @@ public class CurrencyWallet : ICurrencyWallet
         return true;
     }
 
+    public void SetCoins(int amount)
+    {
+        profileService.Profile.coins = Math.Max(0, amount);
+        Save();
+        CoinsChanged?.Invoke();
+    }
+
     public void AddGems(int amount)
     {
         if (amount <= 0)
             return;
 
         profileService.Profile.gems += amount;
+        Save();
+        GemsChanged?.Invoke();
+    }
+
+    public void SetGems(int amount)
+    {
+        profileService.Profile.gems = Math.Max(0, amount);
         Save();
         GemsChanged?.Invoke();
     }

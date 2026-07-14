@@ -61,6 +61,9 @@ public class LevelGeneratorService : ILevelGenerator, IInitializable
         if (runtimeSettings.GeneratedLevelRoot != null)
             return runtimeSettings.GeneratedLevelRoot;
 
+        if (generatedRoot != null)
+            return generatedRoot;
+
         GameObject rootObject = new GameObject("GeneratedLevelRoot");
         return rootObject.transform;
     }

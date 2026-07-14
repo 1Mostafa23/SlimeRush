@@ -79,6 +79,7 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IRunStatsService>().To<RunStatsService>().AsSingle();
         Container.Bind<IRunRewardCalculator>().To<RunRewardCalculator>().AsSingle();
         Container.Bind<IRunResultService>().To<RunResultService>().AsSingle();
+        Container.Bind<IDevSettingsPanel>().To<DevSettingsPanel>().AsSingle();
         Container.BindInterfacesAndSelfTo<RunDefeatWatcher>().AsSingle();
         Container.Bind<ISlimeFactory>().To<AddressableSlimeFactory>().AsSingle();
         Container.Bind<ISlimePool>().To<SlimePool>().AsSingle();

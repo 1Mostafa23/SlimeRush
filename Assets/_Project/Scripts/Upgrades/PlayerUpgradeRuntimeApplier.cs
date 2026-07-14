@@ -33,9 +33,14 @@ public class PlayerUpgradeRuntimeApplier : IInitializable, IDisposable
 
         observedSlimeCountUpgradeLevel = currentLevel;
 
-        if (levelDelta <= 0)
+        if (levelDelta == 0)
             return;
 
-        slimeCrowdCommands.AddSlimes(levelDelta * upgradeService.SlimesPerUpgrade);
+        int slimeDelta = Math.Abs(levelDelta) * upgradeService.SlimesPerUpgrade;
+
+        if (levelDelta > 0)
+            slimeCrowdCommands.AddSlimes(slimeDelta);
+        else
+            slimeCrowdCommands.RemoveSlimes(slimeDelta);
     }
 }

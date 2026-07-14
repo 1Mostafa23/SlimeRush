@@ -39,6 +39,7 @@ public class MainMenuPresenter : MonoBehaviour
     private ILevelProgressService levelProgressService;
     private ILevelConfigProvider levelConfigProvider;
     private IGameplayStartService gameplayStartService;
+    private IDevSettingsPanel devSettingsPanel;
     private IPlayerCrowdMovementController PlayerMovementController =>
         playerMovementController ?? playerCrowdControllerFallback;
 
@@ -48,12 +49,14 @@ public class MainMenuPresenter : MonoBehaviour
         IMusicService musicService,
         ILevelProgressService levelProgressService,
         IGameplayStartService gameplayStartService,
+        [Inject(Optional = true)] IDevSettingsPanel devSettingsPanel,
         [Inject(Optional = true)] ILevelConfigProvider levelConfigProvider)
     {
         this.playerMovementController = playerMovementController;
         this.musicService = musicService;
         this.levelProgressService = levelProgressService;
         this.gameplayStartService = gameplayStartService;
+        this.devSettingsPanel = devSettingsPanel;
         this.levelConfigProvider = levelConfigProvider;
     }
 
@@ -69,6 +72,9 @@ public class MainMenuPresenter : MonoBehaviour
     {
         PlayerMovementController?.SetInputEnabled(false);
         musicService?.SetMenuMode();
+
+        if (levelProgressService != null)
+            levelProgressService.Changed += UpdateLevelText;
     }
 
     private void Update()
@@ -85,6 +91,9 @@ public class MainMenuPresenter : MonoBehaviour
     private void OnDestroy()
     {
         UnbindButtons();
+
+        if (levelProgressService != null)
+            levelProgressService.Changed -= UpdateLevelText;
     }
 
     private void StartGameplay()
@@ -93,6 +102,7 @@ public class MainMenuPresenter : MonoBehaviour
             return;
 
         gameplayStartService?.StartGameplay();
+        devSettingsPanel?.Hide();
         SetMenuVisible(false);
         musicService?.SetGameplayMode();
         PlayerMovementController?.SetInputEnabled(true);
@@ -193,7 +203,7 @@ public class MainMenuPresenter : MonoBehaviour
 
     private void BindButtons()
     {
-        AddClick(settingsButton, LogOpenSettings);
+        AddClick(settingsButton, OpenSettings);
         AddClick(skinsButton, LogOpenSkins);
         AddClick(factoryButton, LogOpenSlimeFactory);
         AddClick(battlePassButton, LogOpenBattlePass);
@@ -205,7 +215,7 @@ public class MainMenuPresenter : MonoBehaviour
 
     private void UnbindButtons()
     {
-        RemoveClick(settingsButton, LogOpenSettings);
+        RemoveClick(settingsButton, OpenSettings);
         RemoveClick(skinsButton, LogOpenSkins);
         RemoveClick(factoryButton, LogOpenSlimeFactory);
         RemoveClick(battlePassButton, LogOpenBattlePass);
@@ -227,7 +237,12 @@ public class MainMenuPresenter : MonoBehaviour
             button.onClick.RemoveListener(action);
     }
 
-    private void LogOpenSettings() => Debug.Log("Open Settings");
+    private void OpenSettings()
+    {
+        Debug.Log("Open Settings");
+        devSettingsPanel?.Toggle(mainMenuCanvas != null ? mainMenuCanvas.transform : transform);
+    }
+
     private void LogOpenSkins() => Debug.Log("Open Skins");
     private void LogOpenSlimeFactory() => Debug.Log("Open Slime Factory");
     private void LogOpenBattlePass() => Debug.Log("Open Battle Pass");

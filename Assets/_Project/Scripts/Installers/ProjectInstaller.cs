@@ -12,6 +12,13 @@ public class ProjectInstaller : MonoInstaller
     [SerializeField, Range(0f, 1f)] private float gameplayMusicVolume = 0.18f;
     [SerializeField] private float musicFadeDuration = 0.5f;
 
+    [Header("SFX")]
+    [SerializeField] private AudioClip slimeIncreaseClip;
+    [SerializeField] private AudioClip slimeCountUpgradeBoughtClip;
+    [SerializeField] private AudioClip victoryRewardClip;
+    [SerializeField, Range(0f, 1f)] private float slimeIncreaseSfxVolume = 0.055f;
+    [SerializeField, Range(0f, 1f)] private float uiSfxVolume = 0.035f;
+
     public override void InstallBindings()
     {
         if (currencyWalletSettings == null)
@@ -39,5 +46,12 @@ public class ProjectInstaller : MonoInstaller
         Container.BindInstance(musicClip).AsSingle();
         Container.BindInstance(new MusicSettings(menuMusicVolume, gameplayMusicVolume, musicFadeDuration)).AsSingle();
         Container.BindInterfacesAndSelfTo<MusicService>().AsSingle();
+        Container.BindInstance(new SfxSettings(
+            slimeIncreaseClip,
+            slimeCountUpgradeBoughtClip,
+            victoryRewardClip,
+            slimeIncreaseSfxVolume,
+            uiSfxVolume)).AsSingle();
+        Container.BindInterfacesAndSelfTo<SfxService>().AsSingle();
     }
 }

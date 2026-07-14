@@ -44,4 +44,11 @@ public class PlayerUpgradeService : IPlayerUpgradeService
         Changed?.Invoke();
         return true;
     }
+
+    public void SetSlimeCountUpgradeLevel(int level)
+    {
+        profileService.Profile.slimeCountUpgradeLevel = Math.Clamp(level, 0, settings.MaxUpgradeLevel);
+        profileService.Save();
+        Changed?.Invoke();
+    }
 }
