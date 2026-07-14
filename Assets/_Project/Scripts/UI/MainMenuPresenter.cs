@@ -38,7 +38,7 @@ public class MainMenuPresenter : MonoBehaviour
     private IMusicService musicService;
     private ILevelProgressService levelProgressService;
     private ILevelConfigProvider levelConfigProvider;
-    private bool isGameplayStarted;
+    private IGameplayStartService gameplayStartService;
     private IPlayerCrowdMovementController PlayerMovementController =>
         playerMovementController ?? playerCrowdControllerFallback;
 
@@ -47,11 +47,13 @@ public class MainMenuPresenter : MonoBehaviour
         IPlayerCrowdMovementController playerMovementController,
         IMusicService musicService,
         ILevelProgressService levelProgressService,
+        IGameplayStartService gameplayStartService,
         [Inject(Optional = true)] ILevelConfigProvider levelConfigProvider)
     {
         this.playerMovementController = playerMovementController;
         this.musicService = musicService;
         this.levelProgressService = levelProgressService;
+        this.gameplayStartService = gameplayStartService;
         this.levelConfigProvider = levelConfigProvider;
     }
 
@@ -71,7 +73,7 @@ public class MainMenuPresenter : MonoBehaviour
 
     private void Update()
     {
-        if (isGameplayStarted)
+        if (gameplayStartService != null && gameplayStartService.IsGameplayStarted)
             return;
 
         UpdateTapToStartFade();
@@ -87,10 +89,10 @@ public class MainMenuPresenter : MonoBehaviour
 
     private void StartGameplay()
     {
-        if (isGameplayStarted)
+        if (gameplayStartService != null && gameplayStartService.IsGameplayStarted)
             return;
 
-        isGameplayStarted = true;
+        gameplayStartService?.StartGameplay();
         SetMenuVisible(false);
         musicService?.SetGameplayMode();
         PlayerMovementController?.SetInputEnabled(true);
@@ -98,7 +100,7 @@ public class MainMenuPresenter : MonoBehaviour
 
     private void ShowMenu()
     {
-        isGameplayStarted = false;
+        gameplayStartService?.ResetGameplay();
         musicService?.SetMenuMode();
         SetMenuVisible(true);
     }

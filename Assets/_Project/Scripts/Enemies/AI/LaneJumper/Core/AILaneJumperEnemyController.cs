@@ -14,6 +14,8 @@ public class AILaneJumperEnemyController : IAILaneJumperEnemy, IAILaneJumperStat
     private readonly IPlayerCrowdPositionProvider playerPositionProvider;
     private readonly IEnemyDefeatHandler defeatHandler;
     private readonly IPlayerPassedEnemyCondition playerPassedEnemyCondition;
+    private readonly IGameplayStartService gameplayStartService;
+    private readonly IRapidFireService rapidFireService;
 
     private readonly AILaneJumperStateMachine stateMachine = new();
     private readonly AILaneJumperPatrolState patrolState;
@@ -37,7 +39,9 @@ public class AILaneJumperEnemyController : IAILaneJumperEnemy, IAILaneJumperStat
         IPlayerCrowdMovementController playerMovementController,
         IPlayerCrowdPositionProvider playerPositionProvider,
         IEnemyDefeatHandler defeatHandler,
-        IPlayerPassedEnemyCondition playerPassedEnemyCondition)
+        IPlayerPassedEnemyCondition playerPassedEnemyCondition,
+        IGameplayStartService gameplayStartService,
+        IRapidFireService rapidFireService)
     {
         this.view = view;
         this.laneJumperEnemySystem = laneJumperEnemySystem;
@@ -48,6 +52,9 @@ public class AILaneJumperEnemyController : IAILaneJumperEnemy, IAILaneJumperStat
         this.playerPositionProvider = playerPositionProvider;
         this.defeatHandler = defeatHandler;
         this.playerPassedEnemyCondition = playerPassedEnemyCondition;
+        this.gameplayStartService = gameplayStartService;
+        this.rapidFireService = rapidFireService;
+        this.gameplayStartService.GameplayStarted += HandleGameplayStarted;
 
         patrolState = new AILaneJumperPatrolState(this);
         observeState = new AILaneJumperObserveState(this);
@@ -71,6 +78,9 @@ public class AILaneJumperEnemyController : IAILaneJumperEnemy, IAILaneJumperStat
         UpdatePowerLabel();
         TryRegister();
         TryStartStateMachine();
+
+        if (CanAttackPlayer())
+            ChangeToObserve();
     }
 
     public void Disable()
@@ -84,6 +94,9 @@ public class AILaneJumperEnemyController : IAILaneJumperEnemy, IAILaneJumperStat
 
     public void Dispose()
     {
+        if (gameplayStartService != null)
+            gameplayStartService.GameplayStarted -= HandleGameplayStarted;
+
         Disable();
     }
 
@@ -183,6 +196,7 @@ public class AILaneJumperEnemyController : IAILaneJumperEnemy, IAILaneJumperStat
             return;
 
         isClashing = true;
+        rapidFireService?.Pause();
         playerMovementController?.StopMovement();
         ChangeToClash();
     }
@@ -190,6 +204,7 @@ public class AILaneJumperEnemyController : IAILaneJumperEnemy, IAILaneJumperStat
     public void EndClash()
     {
         isClashing = false;
+        rapidFireService?.Resume();
     }
 
     public void ResetClashDamageTimer()
@@ -225,10 +240,24 @@ public class AILaneJumperEnemyController : IAILaneJumperEnemy, IAILaneJumperStat
         );
     }
 
+    public bool CanAttackPlayer()
+    {
+        return gameplayStartService != null && gameplayStartService.IsGameplayStarted;
+    }
+
+    private void HandleGameplayStarted()
+    {
+        if (!view.IsActiveAndEnabled || isClashing || view.Combatant == null || view.Combatant.IsDefeated)
+            return;
+
+        ChangeToObserve();
+    }
+
     public void Defeat()
     {
         view.HideWarning();
         isClashing = false;
+        rapidFireService?.Resume();
         view.DisableClashZone();
         view.PlayDefeatFeedback();
         DefeatAsync().Forget();

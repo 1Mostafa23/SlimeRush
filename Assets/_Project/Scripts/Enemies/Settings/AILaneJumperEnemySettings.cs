@@ -56,6 +56,7 @@ public class AILaneJumperEnemySettings : ScriptableObject, IEnemyPowerSettings
     private void OnValidate()
     {
         enemyPower = Mathf.Max(1, enemyPower);
+        patrolDuration = Mathf.Max(0f, patrolDuration);
         dashSpeed = Mathf.Max(0f, dashSpeed);
         dashPlayerSpeedMultiplier = Mathf.Max(0f, dashPlayerSpeedMultiplier);
         minDashSpeed = Mathf.Max(0f, minDashSpeed);

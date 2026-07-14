@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: DefaultAILaneJumperEnemySettings
   m_EditorClassIdentifier: 
   patrolSpeed: 7
-  patrolDuration: 1.5
-  laneReachDistance: 0.05
+  patrolDuration: 4
+  laneReachDistance: 1
   warningDuration: 0.3
-  dashSpeed: 25
+  dashSpeed: 26
   dashPlayerSpeedMultiplier: 0.9
-  minDashSpeed: 12
+  minDashSpeed: 15
   maxDashSpeed: 28
   jumpHeight: 1
   enemyPower: 15

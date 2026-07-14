@@ -9,6 +9,12 @@ public class AILaneJumperObserveState : IAILaneJumperState
 
     public void Enter()
     {
+        if (!enemy.CanAttackPlayer())
+        {
+            enemy.ChangeToPatrol();
+            return;
+        }
+
         if (!enemy.SelectClosestPlayerLane())
         {
             enemy.ChangeToPatrol();

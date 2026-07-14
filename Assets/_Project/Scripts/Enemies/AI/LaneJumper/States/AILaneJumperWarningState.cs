@@ -16,6 +16,12 @@ public class AILaneJumperWarningState : IAILaneJumperState
 
     public void Tick(float deltaTime)
     {
+        if (!enemy.CanAttackPlayer())
+        {
+            enemy.ChangeToPatrol();
+            return;
+        }
+
         timer += deltaTime;
 
         if (timer >= enemy.Settings.WarningDuration)

@@ -1,7 +1,6 @@
 public class AILaneJumperPatrolState : IAILaneJumperState
 {
     private readonly IAILaneJumperStateContext enemy;
-    private float timer;
 
     public AILaneJumperPatrolState(IAILaneJumperStateContext enemy)
     {
@@ -10,16 +9,14 @@ public class AILaneJumperPatrolState : IAILaneJumperState
 
     public void Enter()
     {
-        timer = 0f;
         enemy.HideWarning();
     }
 
     public void Tick(float deltaTime)
     {
-        timer += deltaTime;
         enemy.TickPatrol(deltaTime);
 
-        if (timer >= enemy.Settings.PatrolDuration)
+        if (enemy.CanAttackPlayer())
             enemy.ChangeToObserve();
     }
 

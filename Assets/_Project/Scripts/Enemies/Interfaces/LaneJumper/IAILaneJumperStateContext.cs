@@ -4,6 +4,7 @@ public interface IAILaneJumperStateContext
     int EnemyPower { get; }
     bool IsClashing { get; }
 
+    bool CanAttackPlayer();
     void ChangeToPatrol();
     void ChangeToObserve();
     void ChangeToWarning();

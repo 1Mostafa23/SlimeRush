@@ -16,6 +16,14 @@ public class GameplayInstaller : MonoInstaller
     [SerializeField] private BossRangedAttackSettings bossRangedAttackSettings;
     [SerializeField] private BossClashSettings bossClashSettings;
 
+    [Header("Rapid Fire Bonus")]
+    [SerializeField] private RapidFireProjectile rapidFireProjectilePrefab;
+    [SerializeField] private int rapidFireProjectilePoolInitialSize = 24;
+
+    [Header("Falling Icicle Trap")]
+    [SerializeField] private FallingIcicleProjectileView fallingIcicleProjectilePrefab;
+    [SerializeField] private int fallingIcicleProjectilePoolInitialSize = 24;
+
     [Header("Level Generation")]
     [SerializeField] private LevelConfigLibrary levelConfigLibrary;
     [SerializeField] private Transform generatedLevelRoot;
@@ -67,6 +75,7 @@ public class GameplayInstaller : MonoInstaller
         }
 
         Container.BindInstance(new SlimePrefabAddress(slimePrefabAddress)).AsSingle();
+        Container.Bind<IGameplayStartService>().To<GameplayStartService>().AsSingle();
         Container.Bind<IRunStatsService>().To<RunStatsService>().AsSingle();
         Container.Bind<IRunRewardCalculator>().To<RunRewardCalculator>().AsSingle();
         Container.Bind<IRunResultService>().To<RunResultService>().AsSingle();
@@ -91,7 +100,9 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IShieldStateMachine>().To<ShieldStateMachine>().AsSingle();
         Container.Bind<IShieldService>().To<ShieldService>().AsSingle();
         Container.Bind<IDamageBlocker>().To<ShieldDamageBlocker>().AsSingle();
+        InstallRapidFireBonus();
         Container.Bind<SlimeDamageApplier>().AsSingle();
+        InstallFallingIcicleTrap();
         Container.Bind<AddGateOperation>().AsSingle();
         Container.Bind<MultiplyGateOperation>().AsSingle();
         Container.Bind<SubtractGateOperation>().AsSingle();
@@ -100,6 +111,34 @@ public class GameplayInstaller : MonoInstaller
         Container.Bind<IGateEffectApplier>().To<GateEffectApplier>().AsSingle();
         InstallLevelGeneration();
         BossInstaller.Install(Container, bossProjectilePrefab, bossRangedAttackSettings, bossClashSettings);
+    }
+
+    private void InstallFallingIcicleTrap()
+    {
+        if (fallingIcicleProjectilePrefab == null)
+            return;
+
+        Container.BindMemoryPool<FallingIcicleProjectileView, FallingIcicleProjectileView.Pool>()
+            .WithInitialSize(Mathf.Max(1, fallingIcicleProjectilePoolInitialSize))
+            .FromComponentInNewPrefab(fallingIcicleProjectilePrefab)
+            .UnderTransformGroup("FallingIcicleProjectilePool");
+    }
+
+    private void InstallRapidFireBonus()
+    {
+        Container.Bind<RapidFireInactiveState>().AsSingle();
+        Container.Bind<RapidFireActiveState>().AsSingle();
+        Container.Bind<RapidFireExpiredState>().AsSingle();
+        Container.BindInterfacesAndSelfTo<RapidFireStateMachine>().AsSingle();
+        Container.Bind<IRapidFireService>().To<RapidFireService>().AsSingle();
+
+        if (rapidFireProjectilePrefab == null)
+            return;
+
+        Container.BindMemoryPool<RapidFireProjectile, RapidFireProjectile.Pool>()
+            .WithInitialSize(Mathf.Max(1, rapidFireProjectilePoolInitialSize))
+            .FromComponentInNewPrefab(rapidFireProjectilePrefab)
+            .UnderTransformGroup("RapidFireProjectilePool");
     }
 
     private void InstallLevelGeneration()
